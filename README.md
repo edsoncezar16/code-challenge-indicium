@@ -88,3 +88,24 @@ You can use any language you like, but keep in mind that we will have to run you
 You are free to use opensource libs and frameworks, but also keep in mind that **you have to write code**. Point and click tools are not allowed.
 
 Thank you for participating!
+
+# Solution
+
+- Data Extraction
+
+    We will connect to the Postgres database using a Python library such as psycopg2 and extract the data from all tables into pandas dataframes.
+    We will read the CSV file using pandas' read_csv method.
+
+- Writing to local disk
+
+    We will save the extracted dataframes as separate CSV files using pandas' to_csv method, following the file naming convention mentioned in the challenge: /data/postgres/{table}/{extraction_date}/file.format for Postgres tables and /data/csv/{extraction_date}/file.format for the CSV file.
+
+- Loading data into the data warehouse
+
+    We will use Amazon Redshift as the data warehouse tool and connect to it using a library such as boto3.
+    We will load the saved CSV files into the data warehouse using Amazon Redshift's COPY command.
+
+- Running the final query
+
+    We will write an SQL query to join the orders table from the Postgres database with the details in the loaded CSV file on the order_id field.
+    We will execute the query in the data warehouse and save the result as a CSV file.
