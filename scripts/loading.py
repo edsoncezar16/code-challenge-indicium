@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
-from sqlalchemy import create_engine, text, exc, Column, ForeignKey
+from sqlalchemy import create_engine, text, inspect, exc, Column, ForeignKey
 from sqlalchemy import Integer, Float, String, Date
-from sqlalchemy.orm import relationship, declarative_base
+from sqlalchemy.orm import relationship, declarative_base, sessionmaker
 from get_credentials import CREDENTIALS_PATH, get_db_credentials
 import sys
 import os
@@ -21,8 +21,8 @@ try:
     conn = engine.connect()
     conn.execute(text(f'create database {OUTPUT_DB_NAME}'))
     conn.close()
-except exc.ProgrammingError: # database already exists
-    pass  
+except exc.ProgrammingError:  # database already exists
+    pass
 finally:
     engine.dispose()
 
@@ -63,9 +63,15 @@ order_details_data = pd.read_csv(
 )
 
 # drop previous tables and create new ones with current data
-Base = declarative_base()
-Base.metadata.drop_all(engine)
+inspector = inspect(engine)
+table_names = inspector.get_table_names()
+conn = engine.connect()
+for table_name in table_names:
+    sql = text(f'drop table {table_name} cascade')
+    conn.execute(sql)
+conn.close()
 
+Base = declarative_base()
 
 class Orders(Base):
     __tablename__ = 'orders'
@@ -102,9 +108,14 @@ class OrderDetails(Base):
 Base.metadata.create_all(engine)
 
 # populate tables with the extracted data
-orders_data.to_sql('orders', engine, if_exists='append', index=False)
-order_details_data.to_sql(
-    'order_details', engine, if_exists='append', index=False
-)
-
+Session = sessionmaker(bind=engine)
+session = Session()
+orders = [Orders(**row_data) for _, row_data in orders_data.iterrows()]
+order_details = [
+    OrderDetails(**row_data) for _, row_data in order_details_data.iterrows()
+]
+session.add_all(orders)
+session.add_all(order_details)
+session.commit()
+session.close() # to prevent resource leakage
 engine.dispose()  # to prevent resource leakage
