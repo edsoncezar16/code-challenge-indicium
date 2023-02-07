@@ -36,17 +36,17 @@ if not os.path.exists(csv_folder_path):
 # extract data from the postgres database
 db_name, user, password, port = get_db_credentials(CREDENTIALS_PATH)
 engine = create_engine(
-    f"postgresql://{user}:{password}@'localhost':{port}/{db_name}"
+    f"postgresql://{user}:{password}@localhost:{port}/{db_name}"
 )
 inspector = inspect(engine)
 table_names = inspector.get_table_names()
 for table_name in table_names:
         table = pd.read_sql_table(table_name, engine.connect())
         output_name = f'{date_folder_path}/{table_name}.csv'
-        table.to_csv(output_name)
+        table.to_csv(output_name, index=False)
 engine.dispose() # to prevent resource leaks
 
 # extract data from the provided csv file
 order_details = pd.read_csv(ORDER_DETAILS_PATH)
 csv_output_path = f'{csv_folder_path}/order_details.csv'
-order_details.to_csv(csv_output_path)
+order_details.to_csv(csv_output_path, index=False)

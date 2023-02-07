@@ -73,16 +73,16 @@ class Orders(Base):
     customer_id = Column('customer_id', String, nullable=False)
     employee_id = Column('employee_id', String, nullable=False)
     order_date = Column('order_date', Date)
-    requiredte = Column('requiredte', Date)
-    shipped_te = Column('shipped_te', Date)
-    ship_viate = Column('ship_viate', Integer)
+    required_date = Column('required_date', Date)
+    shipped_date = Column('shipped_date', Date)
+    ship_via = Column('ship_via', Integer)
     freight = Column('freight', Float)
-    ship_namte = Column('ship_namte', String)
-    ship_addte = Column('ship_addte', String)
-    ship_citte = Column('ship_citte', String)
-    ship_regte = Column('ship_regte', String)
-    ship_poste = Column('ship_poste', String)
-    ship_coute = Column('ship_coute', String)
+    ship_name = Column('ship_name', String)
+    ship_address = Column('ship_address', String)
+    ship_city = Column('ship_city', String)
+    ship_region = Column('ship_region', String)
+    ship_postal_code = Column('ship_postal_code', String)
+    ship_country = Column('ship_country', String)
     order_details = relationship('OrderDetails', back_populates='orders')
 
 
@@ -104,7 +104,7 @@ Base.metadata.create_all(engine)
 # populate tables with the extracted data
 orders_data.to_sql('orders', engine, if_exists='append', index=False)
 order_details_data.to_sql(
-    'order_details', engine, if_exists='replace', index=False
+    'order_details', engine, if_exists='append', index=False
 )
 
 engine.dispose()  # to prevent resource leakage
