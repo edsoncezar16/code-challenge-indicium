@@ -1,37 +1,15 @@
 #!/usr/bin/env python3
 
 import pandas as pd
-from sqlalchemy import create_engine, inspect
-from sqlalchemy import MetaData, Table, Column, String
-import yaml
+from sqlalchemy import create_engine, inspect, MetaData
 import sys
 import os
 from datetime import datetime
+from get_credentials import CREDENTIALS_PATH, get_db_credentials
 
-CREDENTIALS_PATH = 'docker-compose.yml'
+
+
 ORDER_DETAILS_PATH = 'data/order_details.csv'
-
-def get_db_credentials(file_path):
-    '''
-        Gets the necessary parameters to connect to the provided 
-        database from a yaml file.
-    '''
-    with open(file_path) as f:
-        data = yaml.load(f, Loader=yaml.FullLoader)
-    db_service = data['services']['db']
-    port = db_service['ports'][0].split(':')[0]
-    environment = db_service['environment']
-    dbname = environment['POSTGRES_DB']
-    user = environment['POSTGRES_USER']
-    password = environment['POSTGRES_PASSWORD']
-    credentials = {
-        'host': 'localhost',
-        'dbname': dbname,
-        'user': user,
-        'password': password,
-        'port': port
-    }
-    return credentials
 
 # Get the extraction date and create a folder to store respective data
 if len(sys.argv) == 1:
