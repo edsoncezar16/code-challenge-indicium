@@ -34,14 +34,9 @@ if not os.path.exists(csv_folder_path):
  
 
 # extract data from the postgres database
-credentials = get_db_credentials(CREDENTIALS_PATH)
-user = credentials['user']
-password = credentials['password']
-host = credentials['host']
-port = credentials['port']
-db_name = credentials['dbname']
+db_name, user, password, port = get_db_credentials(CREDENTIALS_PATH)
 engine = create_engine(
-    f'postgresql://{user}:{password}@{host}:{port}/{db_name}'
+    f"postgresql://{user}:{password}@'localhost':{port}/{db_name}"
 )
 inspector = inspect(engine)
 table_names = inspector.get_table_names()

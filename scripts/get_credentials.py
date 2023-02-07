@@ -15,11 +15,4 @@ def get_db_credentials(file_path):
     dbname = environment['POSTGRES_DB']
     user = environment['POSTGRES_USER']
     password = environment['POSTGRES_PASSWORD']
-    credentials = {
-        'host': 'localhost',
-        'dbname': dbname,
-        'user': user,
-        'password': password,
-        'port': port
-    }
-    return credentials
+    return dbname, user, password, port
