@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
-from sqlalchemy import create_engine, text, exc, Column, ForeignKey
+from sqlalchemy import create_engine, text, inspect, exc, Column, ForeignKey
 from sqlalchemy import Integer, Float, String, Date
-from sqlalchemy.orm import relationship, declarative_base
+from sqlalchemy.orm import relationship, declarative_base, sessionmaker
 from get_credentials import CREDENTIALS_PATH, get_db_credentials
 import sys
 import os
@@ -21,13 +21,14 @@ try:
     conn = engine.connect()
     conn.execute(text(f'create database {OUTPUT_DB_NAME}'))
     conn.close()
-except exc.ProgrammingError: # database already exists
-    pass  
+except exc.ProgrammingError:  # database already exists
+    pass
 finally:
     engine.dispose()
 
 engine = create_engine(
-    f"postgresql://{user}:{password}@localhost/{OUTPUT_DB_NAME}"
+    f"postgresql://{user}:{password}@localhost/{OUTPUT_DB_NAME}",
+    execution_options={'isolation_level': 'AUTOCOMMIT'}
 )
 
 # Get the extraction date and check if the data is present
@@ -62,10 +63,25 @@ order_details_data = pd.read_csv(
     f'{csv_folder_path}/order_details.csv'
 )
 
+# treating the column 'shipped date' in orders table
+# which has 'nan' values that cannot be converted to a date type
+nan_dates = orders_data['shipped_date'].isna()
+orders_data['shipped_date'] = pd.to_datetime(
+    orders_data['shipped_date'], errors='coerce'
+)
+orders_data['shipped_date'].fillna(
+    pd.Timestamp('1970-01-01 00:00:00'), inplace=True
+)
 # drop previous tables and create new ones with current data
-Base = declarative_base()
-Base.metadata.drop_all(engine)
+inspector = inspect(engine)
+table_names = inspector.get_table_names()
+conn = engine.connect()
+for table_name in table_names:
+    sql = text(f'drop table {table_name} cascade')
+    conn.execute(sql)
+conn.close()
 
+Base = declarative_base()
 
 class Orders(Base):
     __tablename__ = 'orders'
@@ -83,7 +99,7 @@ class Orders(Base):
     ship_region = Column('ship_region', String)
     ship_postal_code = Column('ship_postal_code', String)
     ship_country = Column('ship_country', String)
-    order_details = relationship('OrderDetails', back_populates='orders')
+    order_details = relationship('OrderDetails', back_populates='orders', cascade='all, delete-orphan')
 
 
 class OrderDetails(Base):
@@ -102,9 +118,19 @@ class OrderDetails(Base):
 Base.metadata.create_all(engine)
 
 # populate tables with the extracted data
-orders_data.to_sql('orders', engine, if_exists='append', index=False)
-order_details_data.to_sql(
-    'order_details', engine, if_exists='append', index=False
+Session = sessionmaker(bind=engine)
+session = Session()
+orders = [Orders(**row_data) for _, row_data in orders_data.iterrows()]
+order_details = [
+    OrderDetails(**row_data) for _, row_data in order_details_data.iterrows()
+]
+print(f'Insertig data into {OUTPUT_DB_NAME} database.')
+print(
+    f'Inserting {len(orders)} orders and {len(order_details)} order_details.'
 )
-
+session.add_all(orders)
+session.add_all(order_details)
+session.commit()
+print('Done.')
+session.close() # to prevent resource leakage
 engine.dispose()  # to prevent resource leakage
