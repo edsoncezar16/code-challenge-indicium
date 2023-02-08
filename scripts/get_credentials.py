@@ -1,6 +1,7 @@
 import yaml
+import os
 
-CREDENTIALS_PATH = 'docker-compose.yml'
+CREDENTIALS_PATH = os.environ['CREDENTIALS_PATH']
 
 def get_db_credentials(file_path):
     '''
