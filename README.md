@@ -99,10 +99,40 @@ Thank you for participating!
 
 - [x] For the final step, we will use the SQLAlchemy library to load the data into a database of our choice. For this task, we will use PostgreSQL, as it is a well-supported and widely used database that can handle large amounts of data. We will use the SQLAlchemy's ORM (Object-Relational Mapping) to define the database tables, map the Pandas dataframes to those tables, and then use the SQLAlchemy's engine to perform the actual database insertions.
 
-- [ ] To make the pipeline idempotent, we will add a check in the code to see if the data for a particular day has already been processed and saved to the database. If the data exists, we can skip the processing for that day.
-
 - [x] To make it easy to run the pipeline, we will create a shell script that sets up the necessary environment variables and then runs the Python script.
 
 - [x] Finally, we will create a CSV file with the result of the final query, which shows the orders and their details.
 
 This solution should satisfy all the requirements specified in the challenge and will be easy to maintain and extend in the future.
+
+# How to run the pipeline
+
+## Setup
+
+## Usage
+
+```lua
+   solution.sh [-e] [-l] [-q] [-a] [-d DATE]
+
+  Options:
+    -e,      Extract data from sources and write to local disk.
+    -l,      Load data to the output Postgres database.
+    -q,      Query the output database to show the orders and their details and store the query results in local disk in a csv file.
+    -a,      Run all pipeline's operations.
+    -d DATE, Define a date in format "YYYY-MM-DD" to the operations. Default: current date.
+```
+
+**Examples:**
+
+> Run the complete pipeline for today's data:
+
+```sh
+   solution.sh -a
+```
+
+> Load the data extracted into the new database and generate the CSV file with the query result, targeting the date February 3, 2023:
+
+```sh
+   solution.sh -l -q -d 2023-02-03
+```
+
