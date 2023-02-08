@@ -3,13 +3,14 @@
 from sqlalchemy import create_engine, text, inspect, exc, Column, ForeignKey
 from sqlalchemy import Integer, Float, String, Date
 from sqlalchemy.orm import relationship, declarative_base, sessionmaker
-from get_credentials import CREDENTIALS_PATH, get_db_credentials
+from get_credentials import get_db_credentials
 import sys
 import os
 from datetime import datetime
 import pandas as pd
 
-OUTPUT_DB_NAME = 'order_details'
+CREDENTIALS_PATH = os.environ['CREDENTIALS_PATH']
+OUTPUT_DB_NAME = os.environ['OUTPUT_DB_NAME']
 
 _, user, password, port = get_db_credentials(CREDENTIALS_PATH)
 
@@ -32,11 +33,12 @@ engine = create_engine(
 )
 
 # Get the extraction date and check if the data is present
-if len(sys.argv) == 1:
+date_str = sys.argv[1]
+if not date_str:
     extraction_date = datetime.today()
 else:
     try:
-        extraction_date = datetime.strptime(sys.argv[1], '%Y-%m-%d')
+        extraction_date = datetime.strptime(date_str, '%Y-%m-%d')
     except:
         print('''
         Please provide a date in the format 'YYYY-MM-DD' or no date at 
@@ -63,15 +65,6 @@ order_details_data = pd.read_csv(
     f'{csv_folder_path}/order_details.csv'
 )
 
-# treating the column 'shipped date' in orders table
-# which has 'nan' values that cannot be converted to a date type
-nan_dates = orders_data['shipped_date'].isna()
-orders_data['shipped_date'] = pd.to_datetime(
-    orders_data['shipped_date'], errors='coerce'
-)
-orders_data['shipped_date'].fillna(
-    pd.Timestamp('1970-01-01 00:00:00'), inplace=True
-)
 # drop previous tables and create new ones with current data
 inspector = inspect(engine)
 table_names = inspector.get_table_names()

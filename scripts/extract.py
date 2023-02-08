@@ -5,17 +5,18 @@ from sqlalchemy import create_engine, inspect, MetaData
 import sys
 import os
 from datetime import datetime
-from get_credentials import CREDENTIALS_PATH, get_db_credentials
+from get_credentials import get_db_credentials
 
-
-ORDER_DETAILS_PATH = 'data/order_details.csv'
+CREDENTIALS_PATH = os.environ['CREDENTIALS_PATH']
+CSV_PATH = os.environ['CSV_PATH']
 
 # Get the extraction date and create a folder to store respective data
-if len(sys.argv) == 1:
+date_str = sys.argv[1]
+if not date_str:
     extraction_date = datetime.today()
 else:
     try:
-        extraction_date = datetime.strptime(sys.argv[1], '%Y-%m-%d')
+        extraction_date = datetime.strptime(date_str, '%Y-%m-%d')
     except:
         print('''
         Please provide a date in the format 'YYYY-MM-DD' or no date at 
@@ -56,7 +57,7 @@ print('Done.\n')
 
 # extract data from the provided csv file
 print('Extracting data from the csv file ...')
-order_details = pd.read_csv(ORDER_DETAILS_PATH)
+order_details = pd.read_csv(CSV_PATH)
 csv_output_path = f'{csv_folder_path}/order_details.csv'
 print(f'Writting data from csv file to local disk.')
 order_details.to_csv(csv_output_path, index=False)
