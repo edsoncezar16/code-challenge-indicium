@@ -97,7 +97,7 @@ Thank you for participating!
 
 - [x] For writing the data to the local disk, we will use the Pandas to_csv method, which allows us to save the data to a CSV file. We will specify the file path using the date of the execution as part of the folder name. For example, we will save the PostgreSQL data to the following file path: /data/postgres/{execution_date}/{table}.csv, and the CSV data to the following file path: /data/csv/{execution_date}/{table}.csv
 
-- [ ] For the final step, we will use the SQLAlchemy library to load the data into a database of our choice. For this task, we will use PostgreSQL, as it is a well-supported and widely used database that can handle large amounts of data. We will use the SQLAlchemy's ORM (Object-Relational Mapping) to define the database tables, map the Pandas dataframes to those tables, and then use the SQLAlchemy's engine to perform the actual database insertions.
+- [x] For the final step, we will use the SQLAlchemy library to load the data into a database of our choice. For this task, we will use PostgreSQL, as it is a well-supported and widely used database that can handle large amounts of data. We will use the SQLAlchemy's ORM (Object-Relational Mapping) to define the database tables, map the Pandas dataframes to those tables, and then use the SQLAlchemy's engine to perform the actual database insertions.
 
 - [ ] To make the pipeline idempotent, we will add a check in the code to see if the data for a particular day has already been processed and saved to the database. If the data exists, we can skip the processing for that day.
 
