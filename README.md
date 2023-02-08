@@ -101,8 +101,8 @@ Thank you for participating!
 
 - [ ] To make the pipeline idempotent, we will add a check in the code to see if the data for a particular day has already been processed and saved to the database. If the data exists, we can skip the processing for that day.
 
-- [ ] To make it easy to run the pipeline, we will create a shell script that sets up the necessary environment variables and then runs the Python script.
+- [x] To make it easy to run the pipeline, we will create a shell script that sets up the necessary environment variables and then runs the Python script.
 
-- [ ] Finally, we will create a CSV file with the result of the final query, which shows the orders and their details.
+- [x] Finally, we will create a CSV file with the result of the final query, which shows the orders and their details.
 
 This solution should satisfy all the requirements specified in the challenge and will be easy to maintain and extend in the future.

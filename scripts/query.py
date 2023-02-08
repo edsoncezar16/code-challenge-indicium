@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 
 import pandas as pd
+import os
 from get_credentials import CREDENTIALS_PATH, get_db_credentials
 from sqlalchemy import create_engine, text, MetaData
 
-OUTPUT_DB_NAME = 'order_details'
-RESULTS_PATH = 'data/results.csv'
+CREDENTIALS_PATH = os.environ['CREDENTIALS_PATH']
+OUTPUT_DB_NAME = os.environ['OUTPUT_DB_NAME']
+RESULTS_PATH = os.environ['RESULTS_PATH']
 
 _, user, password, port = get_db_credentials(CREDENTIALS_PATH)
 
