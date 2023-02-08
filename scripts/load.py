@@ -92,7 +92,7 @@ class Orders(Base):
     ship_region = Column('ship_region', String)
     ship_postal_code = Column('ship_postal_code', String)
     ship_country = Column('ship_country', String)
-    order_details = relationship('OrderDetails', back_populates='orders')
+    order_details = relationship('OrderDetails', back_populates='orders', cascade='all, delete-orphan')
 
 
 class OrderDetails(Base):
