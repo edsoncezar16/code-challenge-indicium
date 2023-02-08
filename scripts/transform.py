@@ -40,5 +40,8 @@ order_details_data = pd.read_csv(
 # treating the column 'shipped date' in orders table
 # which has 'nan' values that cannot be converted to a date type
 nan_dates = orders_data['shipped_date'].isna()
-print(orders_data[nan_dates])
+orders_data['shipped_date'] = pd.to_datetime(
+    orders_data['shipped_date'], errors='coerce'
+)
+print(orders_data.loc[nan_dates, ['order_id', 'shipped_date']])
 

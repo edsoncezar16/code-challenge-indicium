@@ -27,7 +27,8 @@ finally:
     engine.dispose()
 
 engine = create_engine(
-    f"postgresql://{user}:{password}@localhost/{OUTPUT_DB_NAME}"
+    f"postgresql://{user}:{password}@localhost/{OUTPUT_DB_NAME}",
+    execution_options={'isolation_level': 'AUTOCOMMIT'}
 )
 
 # Get the extraction date and check if the data is present
@@ -64,7 +65,13 @@ order_details_data = pd.read_csv(
 
 # treating the column 'shipped date' in orders table
 # which has 'nan' values that cannot be converted to a date type
-
+nan_dates = orders_data['shipped_date'].isna()
+orders_data['shipped_date'] = pd.to_datetime(
+    orders_data['shipped_date'], errors='coerce'
+)
+orders_data['shipped_date'].fillna(
+    pd.Timestamp('1970-01-01 00:00:00'), inplace=True
+)
 # drop previous tables and create new ones with current data
 inspector = inspect(engine)
 table_names = inspector.get_table_names()
@@ -118,22 +125,12 @@ order_details = [
     OrderDetails(**row_data) for _, row_data in order_details_data.iterrows()
 ]
 print(f'Insertig data into {OUTPUT_DB_NAME} database.')
-print(f'Inserting orders objects')
-total_orders = len(orders)
-for index, order in enumerate(orders):
-    print(f'Inserting object {index + 1}/{total_orders} into staging area.')
-    session.add(order)
-print('#' * 20)
-print(f'Inserting order_details objects')
-total_order_details = len(order_details)
-for index, order_detail in enumerate(order_details):
-    print(
-        f'''
-        Inserting object {index + 1}/{total_order_details} into staging area.'''
-    )
-    session.add(order_detail)
-print('#' * 20)
-print(f'Commiting changes.')
+print(
+    f'Inserting {len(orders)} orders and {len(order_details)} order_details.'
+)
+session.add_all(orders)
+session.add_all(order_details)
 session.commit()
+print('Done.')
 session.close() # to prevent resource leakage
 engine.dispose()  # to prevent resource leakage
