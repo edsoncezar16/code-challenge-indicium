@@ -40,7 +40,7 @@ else:
     except:
         print('''
         Please provide a date in the format 'YYYY-MM-DD' or no date at 
-        all to extract today's data.
+        all to load today's data.
         ''')
         sys.exit(1)
 extraction_date_str = extraction_date.strftime('%Y-%m-%d')
