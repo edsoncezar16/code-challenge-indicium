@@ -62,6 +62,9 @@ order_details_data = pd.read_csv(
     f'{csv_folder_path}/order_details.csv'
 )
 
+# treating the column 'shipped date' in orders table
+# which has 'nan' values that cannot be converted to a date type
+
 # drop previous tables and create new ones with current data
 inspector = inspect(engine)
 table_names = inspector.get_table_names()
@@ -114,8 +117,23 @@ orders = [Orders(**row_data) for _, row_data in orders_data.iterrows()]
 order_details = [
     OrderDetails(**row_data) for _, row_data in order_details_data.iterrows()
 ]
-session.add_all(orders)
-session.add_all(order_details)
+print(f'Insertig data into {OUTPUT_DB_NAME} database.')
+print(f'Inserting orders objects')
+total_orders = len(orders)
+for index, order in enumerate(orders):
+    print(f'Inserting object {index + 1}/{total_orders} into staging area.')
+    session.add(order)
+print('#' * 20)
+print(f'Inserting order_details objects')
+total_order_details = len(order_details)
+for index, order_detail in enumerate(order_details):
+    print(
+        f'''
+        Inserting object {index + 1}/{total_order_details} into staging area.'''
+    )
+    session.add(order_detail)
+print('#' * 20)
+print(f'Commiting changes.')
 session.commit()
 session.close() # to prevent resource leakage
 engine.dispose()  # to prevent resource leakage
