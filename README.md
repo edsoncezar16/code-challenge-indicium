@@ -112,27 +112,26 @@ This solution should satisfy all the requirements specified in the challenge and
 ## Usage
 
 ```lua
-   solution.sh [-e] [-l] [-q] [-a] [-d DATE]
+   solution.sh [-a] [-e] [-l] [-q] [-d DATE]
 
   Options:
-    -e,      Extract data from sources and write to local disk.
-    -l,      Load data to the output Postgres database.
-    -q,      Query the output database to show the orders and their details and store the query results in local disk in a csv file.
-    -a,      Run all pipeline's operations.
-    -d DATE, Define a date in format "YYYY-MM-DD" to the operations. Default: current date.
+    -a, --all              All pipeline's operations are executed.
+    -e, --extract          Extract data from from the provided sources.
+    -l, --load             Load data to the output Postgres database.
+    -q, --query            Query output database to show the orders and their details and stores the result to local disk.
+    -d DATE, --date DATE   Define a date in the format "YYYY-MM-DD" to execute the operations. Default: current date.
 ```
 
-**Examples:**
+## Examples
 
 > Run the complete pipeline for today's data:
-
 ```sh
    solution.sh -a
 ```
 
-> Load the data extracted into the new database and generate the CSV file with the query result, targeting the date February 3, 2023:
+> Load the data from September 20, 2022 into the output database and store a CSV file with the query result in local disk:
 
 ```sh
-   solution.sh -l -q -d 2023-02-03
+   solution.sh -l -q -d 2022-09-20
 ```
 
