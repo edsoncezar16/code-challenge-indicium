@@ -2,7 +2,7 @@
 
 import pandas as pd
 import os
-from get_credentials import CREDENTIALS_PATH, get_db_credentials
+from utils import get_db_credentials
 from sqlalchemy import create_engine, text, MetaData
 
 CREDENTIALS_PATH = os.environ['CREDENTIALS_PATH']
