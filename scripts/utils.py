@@ -2,7 +2,6 @@ import yaml
 import sys
 from datetime import datetime
 
-
 def get_db_credentials(file_path):
     """
     Gets the necessary parameters to connect to the provided
@@ -36,7 +35,7 @@ def get_operation_date():
                     """
                 )
                 sys.exit(1)
-        except:
+        except ValueError:
             print(
                 """
                 Please provide a date in the format 'YYYY-MM-DD' or no date at

@@ -22,6 +22,7 @@ function usage {
     -l, --load             Load data to the output Postgres database.
     -q, --query            Query output database to show the orders and their details and stores the result to local disk.
     -d DATE, --date DATE   Define a date in the format 'YYYY-MM-DD' to execute the operations. Default: current date."
+    exit 1
 }
 
 PARSED_ARGUMENTS=$(getopt -a -n solution -o aelqd: --long all,extract,load,query,date: -- "$@")
