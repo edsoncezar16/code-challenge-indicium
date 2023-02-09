@@ -18,8 +18,7 @@ if not os.path.exists(date_folder_path):
     os.makedirs(date_folder_path)
 if not os.path.exists(csv_folder_path):
     os.makedirs(csv_folder_path)
-print("Done.\n")
-
+    
 # extract data from the postgres database
 db_name, user, password, port = get_db_credentials(CREDENTIALS_PATH)
 engine = create_engine(f"postgresql://{user}:{password}@localhost:{port}/{db_name}")
