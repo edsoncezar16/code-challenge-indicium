@@ -2,6 +2,7 @@
 
 import pandas as pd
 import os
+import sys
 from utils import get_db_credentials
 from sqlalchemy import create_engine, text, MetaData
 
@@ -23,10 +24,19 @@ query = text(
     ON ORDERS.ORDER_ID = ORDER_DETAILS.ORDER_ID
     '''
 )
-conn = engine.connect()
-results = pd.read_sql_query(query, conn)
-conn.close()
-engine.dispose()
-results = results.T.drop_duplicates().T # to avoid repetition
-# resulting from the join operation
-results.to_csv(RESULTS_PATH, index=False)
+try:
+    conn = engine.connect()
+    results = pd.read_sql_query(query, conn)
+    conn.close()
+    engine.dispose()
+    results = results.T.drop_duplicates().T # to avoid repetition
+    # resulting from the join operation
+    results.to_csv(RESULTS_PATH, index=False)
+except: # output database is not set
+    print(
+        '''
+        Output database is not set. Please consider loading data to output
+        database before querying.
+        '''
+    )
+    sys.exit(1)
