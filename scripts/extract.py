@@ -6,6 +6,7 @@ import warnings
 import os
 from utils import get_db_credentials, get_operation_date
 
+DB_HOST = os.environ["DB_HOST"]
 CREDENTIALS_PATH = os.environ["CREDENTIALS_PATH"]
 CSV_PATH = os.environ["CSV_PATH"]
 
@@ -21,7 +22,9 @@ if not os.path.exists(csv_folder_path):
 
 # extract data from the postgres database
 db_name, user, password, port = get_db_credentials(CREDENTIALS_PATH)
-engine = create_engine(f"postgresql://{user}:{password}@localhost:{port}/{db_name}")
+engine = create_engine(
+    f"postgresql://{user}:{password}@{DB_HOST}:{port}/{db_name}"
+)
 inspector = inspect(engine)
 table_names = inspector.get_table_names()
 total_tables = len(table_names)

@@ -1,5 +1,7 @@
 #!/bin/bash
 
+export DB_HOST='db' # For running inside a docker container. 
+# Change to 'localhost' for running on a hosting machine.
 export CREDENTIALS_PATH='docker-compose.yml'
 export CSV_PATH='data/order_details.csv'
 export OUTPUT_DB_NAME='order_details'
