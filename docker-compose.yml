@@ -12,3 +12,16 @@ services:
       - ./data/northwind.sql:/docker-entrypoint-initdb.d/northwind.sql
     ports:
       - 5432:5432
+    container_name: db
+  
+  pipeline:
+    build: .
+    restart: always
+    volumes:
+      - pipeline-data:/pipeline/data
+    container_name: pipeline
+    stdin_open: true 
+    tty: true
+
+volumes:
+  pipeline-data:

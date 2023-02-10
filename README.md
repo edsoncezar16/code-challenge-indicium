@@ -108,20 +108,21 @@ This solution should satisfy all the requirements specified in the challenge and
 # How to run the pipeline
 
 ## Setup
-- Ensure your system has Docker Compose and Python installed. This project was done with Docker Compose 2.16.0 and Python 3.10.4.
+- Have a working instance of docker compose.
 
-- Install dependencies (prefereably inside a virtual environment):
-```sh
-  pip install -r requirements.txt
-```
-*Note: for building wheels for psycopg2, which is one of the requirements, one needs libpq-dev and gcc installed in Debian-based systems.*
+- Clone the repo.
 
-- Initialize the source database:
+- At the repo root, execute the command
 ```sh
-   docker-compose up -d
+   docker compose up -d
 ```
 
+- After the containers are up and running, execute:
+```sh
+   docker compose exec -it pipeline bash
+```
 
+This shoud open an interactive bash session where you can use the pipeline according to the following instructions.
 ## Usage
 
 ```lua
@@ -142,9 +143,19 @@ This solution should satisfy all the requirements specified in the challenge and
    ./pipeline.sh -a
 ```
 
-> Load the data from September 20, 2022 into the output database and store a CSV file with the query result in local disk:
+> Load the data from September 20, 2022 into the output database and store a CSV file with the query result on local disk:
 
 ```sh
    ./pipeline.sh -l -q -d 2022-09-20
 ```
+## Shutting down the containers
 
+After you are done playing with the pipeline, run
+
+```sh
+   docker compose down [--volumes]
+```
+
+to set remove the containers.
+
+*Note: use the flag --volumes if you also want to remove the volumes that store data previously extracted by the pipeline.* 

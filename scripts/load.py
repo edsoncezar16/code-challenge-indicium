@@ -8,13 +8,14 @@ import sys
 import os
 import pandas as pd
 
+DB_HOST = os.environ["DB_HOST"]
 CREDENTIALS_PATH = os.environ["CREDENTIALS_PATH"]
 OUTPUT_DB_NAME = os.environ["OUTPUT_DB_NAME"]
 
 _, user, password, port = get_db_credentials(CREDENTIALS_PATH)
 
 engine = create_engine(
-    f"postgresql://{user}:{password}@localhost/postgres",
+    f"postgresql://{user}:{password}@{DB_HOST}/postgres",
     execution_options={"isolation_level": "AUTOCOMMIT"},
 )
 try:
@@ -27,7 +28,7 @@ finally:
     engine.dispose()
 
 engine = create_engine(
-    f"postgresql://{user}:{password}@localhost/{OUTPUT_DB_NAME}",
+    f"postgresql://{user}:{password}@{DB_HOST}/{OUTPUT_DB_NAME}",
     execution_options={"isolation_level": "AUTOCOMMIT"},
 )
 
@@ -53,7 +54,7 @@ orders_data = pd.read_csv(f"{date_folder_path}/orders.csv")
 order_details_data = pd.read_csv(f"{csv_folder_path}/order_details.csv")
 
 # drop previous tables and create new ones with current data
-inspector = inspect(engine)
+inspector = inspect(subject=engine)
 table_names = inspector.get_table_names()
 conn = engine.connect()
 for table_name in table_names:
