@@ -103,18 +103,39 @@ class OrderDetails(Base):
 
 Base.metadata.create_all(engine)
 
-# populate tables with the extracted data
 Session = sessionmaker(bind=engine)
+
+print(f"Insertig data into {OUTPUT_DB_NAME} database.")
+
+# populate table orders with the extracted data
 session = Session()
 orders = [Orders(**row_data) for _, row_data in orders_data.iterrows()]
-order_details = [
-    OrderDetails(**row_data) for _, row_data in order_details_data.iterrows()
-]
-print(f"Insertig data into {OUTPUT_DB_NAME} database.")
-print(f"Inserting {len(orders)} orders and {len(order_details)} order_details.")
+print(f"Inserting {len(orders)} orders.")
 session.add_all(orders)
-session.add_all(order_details)
 session.commit()
 print("Done.")
 session.close()  # to prevent resource leakage
+
+# these comments are from debugging an unexpected error which appeared random
+# print('Testing if order_id=10300 does exist in table orders.')
+# print('Displaying the result of "select count(*) from orders where order_id=10300"')
+# conn = engine.connect()
+# query = text('select count(*) from orders where order_id=10300')
+# result = conn.execute(query)
+# print(result.fetchall())
+# result.close()
+# conn.close()
+
+# populate table order_details with the extracted data
+
+session = Session()
+order_details = [
+    OrderDetails(**row_data) for _, row_data in order_details_data.iterrows()
+]
+print(f'Inserting {len(order_details)} order_details')
+session.add_all(order_details)
+session.commit()
+print('Done.')
+session.close()
+
 engine.dispose()  # to prevent resource leakage
