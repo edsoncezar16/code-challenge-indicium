@@ -114,8 +114,9 @@ This solution should satisfy all the requirements specified in the challenge and
 
 - At the repo root, execute the command
 ```sh
-   docker compose up -d
+   docker compose up -d [--build]
 ```
+*Note: use the --build flag if you want to rebuild the pipeline docker image.*
 
 - After the containers are up and running, execute:
 ```sh
@@ -123,6 +124,8 @@ This solution should satisfy all the requirements specified in the challenge and
 ```
 
 This shoud open an interactive bash session where you can use the pipeline according to the following instructions.
+
+*Note: the pipeline.sh script sets up environment variables before running the pipeline. You might want take a look at the default values or change them at your will. Pay special attention to the **DB_HOST** variable in case you want to execute the pipeline outside a docker container.*
 ## Usage
 
 ```lua
@@ -158,4 +161,4 @@ After you are done playing with the pipeline, run
 
 to set remove the containers.
 
-*Note: use the flag --volumes if you also want to remove the volumes that store data previously extracted by the pipeline.* 
+*Note: use the flag --volumes if you also want to remove the docker volumes that store data previously extracted by the pipeline. This might come in handy for certain unexpected bugs.* 
