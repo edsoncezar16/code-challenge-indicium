@@ -12,3 +12,28 @@ services:
       - ./data/northwind.sql:/docker-entrypoint-initdb.d/northwind.sql
     ports:
       - 5432:5432
+    networks:
+      - indicium-code-challenge
+    container_name: db
+
+  pipeline:
+    image: python:3.11-bullseye
+    volumes:
+      - ./:/challenge
+      - pipeline-data:/challenge/data
+    working_dir: /challenge
+    environment:
+      PYTHON_PACKAGES: |
+        bash
+        pip
+        -r requirements.txt
+    command: /bin/bash
+    depends_on:
+      - db
+    container_name: pipeline
+
+networks:
+  indicium-code-challenge:
+
+volumes:
+  pipeline-data:

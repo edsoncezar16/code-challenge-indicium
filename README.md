@@ -112,7 +112,7 @@ This solution should satisfy all the requirements specified in the challenge and
 ## Usage
 
 ```lua
-   solution.sh [-a] [-e] [-l] [-q] [-d DATE]
+   pipeline.sh [-a] [-e] [-l] [-q] [-d DATE]
 
   Options:
     -a, --all              All pipeline's operations are executed.
@@ -126,12 +126,12 @@ This solution should satisfy all the requirements specified in the challenge and
 
 > Run the complete pipeline for today's data:
 ```sh
-   solution.sh -a
+   pipeline.sh -a
 ```
 
 > Load the data from September 20, 2022 into the output database and store a CSV file with the query result in local disk:
 
 ```sh
-   solution.sh -l -q -d 2022-09-20
+   pipeline.sh -l -q -d 2022-09-20
 ```
 
