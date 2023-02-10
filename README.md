@@ -108,14 +108,28 @@ This solution should satisfy all the requirements specified in the challenge and
 # How to run the pipeline
 
 ## Setup
+- Have a working instance of docker compose.
 
+- Clone the repo.
+
+- At the repo root, execute the command
+```sh
+   docker compose up -d
+```
+
+- After the containers are up and running, execute:
+```sh
+   docker compose exec -it pipeline bash
+```
+
+This shoud open an interactive bash session where you can use the pipeline according to the following instructions.
 ## Usage
 
 ```lua
-   pipeline.sh [-a] [-e] [-l] [-q] [-d DATE]
+   ./pipeline.sh [-a] [-e] [-l] [-q] [-d DATE]
 
   Options:
-    -a, --all              All pipeline's operations are executed.
+    -a, --all              All pipeline operations are executed.
     -e, --extract          Extract data from from the provided sources.
     -l, --load             Load data to the output Postgres database.
     -q, --query            Query output database to show the orders and their details and stores the result to local disk.
@@ -126,12 +140,22 @@ This solution should satisfy all the requirements specified in the challenge and
 
 > Run the complete pipeline for today's data:
 ```sh
-   pipeline.sh -a
+   ./pipeline.sh -a
 ```
 
-> Load the data from September 20, 2022 into the output database and store a CSV file with the query result in local disk:
+> Load the data from September 20, 2022 into the output database and store a CSV file with the query result on local disk:
 
 ```sh
-   pipeline.sh -l -q -d 2022-09-20
+   ./pipeline.sh -l -q -d 2022-09-20
+```
+## Shutting down the containers
+
+After you are done playing with the pipeline, run
+
+```sh
+   docker compose down [--volumes]
 ```
 
+to set remove the containers.
+
+*Note: use the flag --volumes if you also want to remove the volumes that store data previously extracted by the pipeline.* 
