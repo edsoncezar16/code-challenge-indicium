@@ -108,11 +108,24 @@ This solution should satisfy all the requirements specified in the challenge and
 # How to run the pipeline
 
 ## Setup
+- Ensure your system has Docker Compose and Python installed. This project was done with Docker Compose 2.16.0 and Python 3.10.4.
+
+- Install dependencies (prefereably inside a virtual environment):
+```sh
+  pip install -r requirements.txt
+```
+*Note: for building wheels for psycopg2, which is one of the requirements, one needs libpq-dev and gcc installed in Debian-based systems.*
+
+- Initialize the source database:
+```sh
+   docker-compose up -d
+```
+
 
 ## Usage
 
 ```lua
-   solution.sh [-a] [-e] [-l] [-q] [-d DATE]
+   ./pipeline.sh [-a] [-e] [-l] [-q] [-d DATE]
 
   Options:
     -a, --all              All pipeline's operations are executed.
