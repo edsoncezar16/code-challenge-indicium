@@ -128,10 +128,10 @@ This solution should satisfy all the requirements specified in the challenge and
    ./pipeline.sh [-a] [-e] [-l] [-q] [-d DATE]
 
   Options:
-    -a, --all              All pipeline's operations are executed.
-    -e, --extract          Extract data from from the provided sources.
+    -a, --all              All pipeline operations are executed.
+    -e, --extract          Extract data from the provided sources.
     -l, --load             Load data to the output Postgres database.
-    -q, --query            Query output database to show the orders and their details and stores the result to local disk.
+    -q, --query            Query output database to show the orders and their details and stores the result on local disk.
     -d DATE, --date DATE   Define a date in the format "YYYY-MM-DD" to execute the operations. Default: current date.
 ```
 
@@ -139,12 +139,12 @@ This solution should satisfy all the requirements specified in the challenge and
 
 > Run the complete pipeline for today's data:
 ```sh
-   solution.sh -a
+   ./pipeline.sh -a
 ```
 
 > Load the data from September 20, 2022 into the output database and store a CSV file with the query result in local disk:
 
 ```sh
-   solution.sh -l -q -d 2022-09-20
+   ./pipeline.sh -l -q -d 2022-09-20
 ```
 
