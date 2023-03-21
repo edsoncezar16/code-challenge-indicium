@@ -9,7 +9,7 @@ def get_db_credentials(file_path):
     """
     with open(file_path) as f:
         data = yaml.load(f, Loader=yaml.FullLoader)
-    db_service = data["services"]["db"]
+    db_service = data["services"]["northwind_db"]
     port = db_service["ports"][0].split(":")[0]
     environment = db_service["environment"]
     dbname = environment["POSTGRES_DB"]

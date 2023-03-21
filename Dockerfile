@@ -1,16 +1,8 @@
-FROM python:3.11.2-bullseye as builder
+FROM apache/airflow:2.5.2
 
-COPY requirements.txt .
+ADD requirements.txt .
 
-RUN pip install --user -r requirements.txt
-
-FROM python:3.11.2-bullseye 
-
-WORKDIR /pipeline
-
-COPY --from=builder /root/.local /root/.local
-
-ENV PATH=/root/.local:$PATH
+RUN pip install -r requirements.txt
 
 COPY ./data ./data
 
