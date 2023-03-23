@@ -143,6 +143,11 @@ services:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./logs:/opt/airflow/logs
+      - ./plugins:/opt/airflow/plugins
+      - indicium-lfs:/opt/airflow/indicium-lfs
 
   airflow-worker:
     <<: *airflow-common
@@ -165,8 +170,11 @@ services:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./logs:/opt/airflow/logs
+      - ./plugins:/opt/airflow/plugins
+      - indicium-lfs:/opt/airflow/indicium-lfs
 
   airflow-triggerer:
     <<: *airflow-common
@@ -310,3 +318,4 @@ services:
 
 volumes:
   postgres-db-volume:
+  indicium-lfs:
