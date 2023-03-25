@@ -78,7 +78,7 @@ x-airflow-common:
     - ${AIRFLOW_PROJ_DIR:-.}/dags:/opt/airflow/dags
     - ${AIRFLOW_PROJ_DIR:-.}/logs:/opt/airflow/logs
     - ${AIRFLOW_PROJ_DIR:-.}/plugins:/opt/airflow/plugins
-    - indicium-lfs:/opt/airflow/indicium-lfs
+    - indicium-lfs:/var/lib/indicium-lfs/data
   #user: "${AIRFLOW_UID:-50000}:0"
   user: "0:0"
   depends_on:
@@ -298,18 +298,29 @@ services:
       airflow-init:
         condition: service_completed_successfully
   
-  northwind_db:
+  northwind-db:
     image: postgres:12
     environment:
       POSTGRES_DB: northwind
       POSTGRES_USER: northwind_user
       POSTGRES_PASSWORD: thewindisblowing
     volumes:
-      - ./dbdata:/var/lib/postgresql/northwind/data
+      - ./dbdata:/var/lib/northwind/data
       - ./data/northwind.sql:/docker-entrypoint-initdb.d/northwind.sql
     ports:
       - 5432:5432
 
+  analytics-db:
+    image: postgres:12
+    environment:
+      POSTGRES_DB: analytics
+      POSTGRES_USER: datanauta
+      POSTGRES_PASSWORD: dataforsmartdecisions
+    volumes:
+    - analytics-db-volume:/var/lib/analytics/data
+    ports:
+      - 5431:5431
 volumes:
   postgres-db-volume:
   indicium-lfs:
+  analytics-db-volume:

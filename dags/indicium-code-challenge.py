@@ -12,7 +12,7 @@ from collections import namedtuple
 NamedTable = namedtuple("NamedTable", "name data")
 
 INPUT_CONN_ID = 'northwind-db'
-LFS_PATH = '/opt/airflow/indicium-lfs'
+LFS_PATH = '/var/lib/indicium-lfs/data'
 
 default_args = {
     'owner': 'airflow',
