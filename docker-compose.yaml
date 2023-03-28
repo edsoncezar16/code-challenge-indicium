@@ -319,7 +319,7 @@ services:
     volumes:
     - analytics-db-volume:/var/lib/analytics/data
     ports:
-      - 5431:5431
+      - 5434:5432
 volumes:
   postgres-db-volume:
   indicium-lfs:
