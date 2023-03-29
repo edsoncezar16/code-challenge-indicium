@@ -1,17 +1,12 @@
-# code-challenge
-Indicium code challenge for Software Developer focusing on data projects
-
 # Indicium Tech Code Challenge
 
 Code challenge for Software Developer with focus in data projects.
-
 
 ## Context
 
 At Indicium we have many projects where we develop the whole data pipeline for our client, from extracting data from many data sources to loading this data at its final destination, with this final destination varying from a data warehouse for a Business Intelligency tool to an api for integrating with third party systems.
 
 As a software developer with focus in data projects your mission is to plan, develop, deploy, and maintain a data pipeline.
-
 
 ## The Challenge
 
@@ -21,18 +16,17 @@ The CSV file represents details of orders from a ecommerce system.
 
 The database provided is a sample database provided by microsoft for education purposes called northwind, the only difference is that the order_detail table does not exists in this database you are beeing provided with.This order_details table is represented by the CSV file we provide.
 
-Schema of the original Northwind Database: 
+Schema of the original Northwind Database:
 
 ![image](https://user-images.githubusercontent.com/49417424/105997621-9666b980-608a-11eb-86fd-db6b44ece02a.png)
 
 Your mission is to build a pipeline that extracts the data everyday from both sources and write the data first to local disk, and second to a database of your choice. For this challenge, the CSV file and the database will be static, but in any real world project, both data sources would be changing constantly.
 
-
 Its important that all writing steps are isolated from each other, you shoud be able to run any step without executing the others.
 
 For the first step, where you write data to local disk, you should write one file for each table and one file for the input CSV file. This pipeline will run everyday, so there should be a separation in the file paths you will create for each source(CSV or Postgres), table and execution day combination, e.g.:
 
-```
+```sh
 /data/postgres/{table}/2021-01-01/file.format
 /data/postgres/{table}/2021-01-02/file.format
 /data/csv/2021-01-02/file.format
@@ -40,7 +34,7 @@ For the first step, where you write data to local disk, you should write one fil
 
 you are free to chose the naming and the format of the file you are going to save.
 
-At step 2, you should load the data from the local filesystem to the final database that you chosed. 
+At step 2, you should load the data from the local filesystem to the final database that you chosed.
 
 The final goal is to be able to run a query that shows the orders and its details. The Orders are placed in a table called **orders** at the postgres Northwind database. The details are placed at the csv file provided, and each line has an **order_id** field pointing the **orders** table.
 
@@ -49,8 +43,6 @@ How you are going to build this query will heavily depend on which database you 
 The pipeline will look something like this:
 
 ![image](https://user-images.githubusercontent.com/49417424/105993225-e2aefb00-6084-11eb-96af-3ec3716b151a.png)
-
-
 
 ## Requirements
 
@@ -71,12 +63,12 @@ The pipeline will look something like this:
 ## Setup of the source database
 
 The source database can be set up using docker compose.
-You can install following the instructions at 
-https://docs.docker.com/compose/install/
+You can install following the instructions at
+<https://docs.docker.com/compose/install/>
 
 With docker compose installed simply run
 
-```
+```sh
 docker-compose up
 ```
 
@@ -89,7 +81,7 @@ You are free to use opensource libs and frameworks, but also keep in mind that *
 
 Thank you for participating!
 
-# Solution
+## Solution
 
 - [x] We will use Python as the programming language. Python has a lot of libraries and tools that make it easy to work with different data sources, including PostgreSQL and CSV files.
 
@@ -99,36 +91,96 @@ Thank you for participating!
 
 - [x] For the final step, we will use the SQLAlchemy library to load the data into a database of our choice. For this task, we will use PostgreSQL, as it is a well-supported and widely used database that can handle large amounts of data. We will use the SQLAlchemy's ORM (Object-Relational Mapping) to define the database tables, map the Pandas dataframes to those tables, and then use the SQLAlchemy's engine to perform the actual database insertions.
 
-- [x] To make it easy to run the pipeline, we will create a shell script that sets up the necessary environment variables and then runs the Python script.
-
-- [ ] We will use Airflow to orchestrate the data pipeline functioning.
+- [x] We will use Airflow to orchestrate the data pipeline functioning.
 
 - [x] Finally, we will create a CSV file with the result of the final query, which shows the orders and their details.
 
 This solution should satisfy all the requirements specified in the challenge and will be easy to maintain and extend in the future.
 
-# How to run the pipeline
+## Setup and running the pipeline
 
-## Setup
+### Airflow
+
 - Have a working instance of docker compose.
 
 - Clone the repo.
 
-- At the repo root, execute the command
-```sh
-   docker compose up -d [--build]
-```
-*Note: use the --build flag if you want to rebuild the pipeline docker image.*
+- If you don't have the docker volumes with Airflow data from previous runs (for instante, in the very first run after you clone the repo or if you voluntarily removed them), at the repo root execute the command
 
-[TO BE CONTINUED]
+```sh
+   docker compose up airflow-init
+```
+
+*Note: in this scenario, this step is necessary because we are using the [Airflow Docs quick setup](https://airflow.apache.org/docs/apache-airflow/stable/howto/docker-compose/index.html) of an airflow celery architecture.*
+
+Now, spin up the application with
+
+```sh
+   docker compose up -d --build
+```
+
+### Databases
+
+After the Airflow app is up and running, access the airflow webserver on [localhost:8080](localhost:8080) and enter the username and password 'airflow' when requested.
+
+After the login, in the main menu (next to the Airflow logo) select 'Admin' >> 'Connections'. Then, add the records corresponding to the northwind-db and analytics-db services present in the compose file:
+
+#### Northwind
+
+Field | Value
+:---: | :---:
+Connection ID | northwind-db
+Connection Type | Postgres
+Host | northwind-db
+Schema | northwind
+Login | northwind_user
+Password | thewindisblowing
+Port | 5432
+
+#### Analytics
+
+Field | Value
+:---: | :---:
+Connection ID | analytics-db
+Connection Type | Postgres
+Host | analytics-db
+Schema | analytics
+Login | datanauta
+Password | dataforsmartdecisions
+Port | 5432
+
+### Running the pipeline
+
+After all is set up, run the following:
+
+```sh
+docker compose exec -it airflow-scheduler bash
+```
+
+This will give you access to an interactive bash session where you can run the pipeline as follows:
+
+#### Run for today's data
+
+```sh
+airflow dags trigger indicium-code-challenge
+```
+
+#### Run for past data
+
+For example, to run the pipeline for the date March 13, 2023, use the following:
+
+```sh
+airflow dags backfill indicium-code-challenge --start-date 2023-03-13 --end-date 2023-03-13
+```
+
 ## Shutting down the containers
 
 After you are done playing with the pipeline, run
 
 ```sh
-   docker compose down [--volumes] --remove-orphans
+docker compose down [--volumes] --remove-orphans
 ```
 
-to set remove the containers.
+to shut down and remove the containers.
 
-*Note: use the flag --volumes if you also want to remove the docker volumes that store data previously extracted by the pipeline. This might come in handy for certain unexpected bugs.* 
+*Note: use the flag --volumes if you also want to remove the docker volumes that store data previously extracted by the pipeline and Airflow data.*

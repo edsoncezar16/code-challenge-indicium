@@ -70,18 +70,18 @@ def extract_csv():
     return order_details
 
 
-def get_source_path(source="postgres"):
-    """Returns the path of the local file system folders for reading and writing operations.
+def get_folder_path(name):
+    """Returns the path of the local file system folder for reading and writing operations.
 
     Args:
-        source: one of the strings 'postgres' or 'csv', the data source.
+        name: "postgres", "csv" or "results", the folder name.
 
     Returns:
-        lfs_path: string with the requested path.
+        folder_path: string with the requested path.
     """
     logical_date = datetime.today() - timedelta(days=1)
-    source_path = f"{LFS_PATH}/{source}/{logical_date.strftime('%Y-%m-%d')}"
-    return source_path
+    folder_path = f"{LFS_PATH}/{name}/{logical_date.strftime('%Y-%m-%d')}"
+    return folder_path
 
 
 def tables_to_lfs(**context):
@@ -94,7 +94,7 @@ def tables_to_lfs(**context):
         None
     """
     tables = context["task_instance"].xcom_pull(task_ids="extract.tables")
-    folder_path = get_source_path()
+    folder_path = get_folder_path("postgres")
     if not os.path.exists(folder_path):
         os.makedirs(folder_path)
     for table in tables:
@@ -112,7 +112,7 @@ def csv_to_lfs(**context):
         None
     """
     order_details = context["task_instance"].xcom_pull(task_ids="extract.csv")
-    folder_path = get_source_path("csv")
+    folder_path = get_folder_path("csv")
     if not os.path.exists(folder_path):
         os.makedirs(folder_path)
     output_csv_path = f"{folder_path}/{order_details.name}.csv"
@@ -127,7 +127,7 @@ def clean_data():
     Returns:
         None
     """
-    folder_path = get_source_path()
+    folder_path = get_folder_path("postgres")
     if not os.path.exists(folder_path):
         print(
             """
@@ -158,8 +158,8 @@ def lfs_to_analytics():
     Returns:
         None
     """
-    pg_folder_path = get_source_path()
-    csv_folder_path = get_source_path("csv")
+    pg_folder_path = get_folder_path("postgres")
+    csv_folder_path = get_folder_path("csv")
     loading_data_available = (os.path.exists(pg_folder_path)) and (
         os.path.exists(csv_folder_path)
     )
@@ -235,6 +235,45 @@ def lfs_to_analytics():
     engine.dispose()
 
 
+def query_and_store_results():
+    """Queries the alanytics database to show all orders and their details, and saves the result to a csv file.
+
+    Args:
+        None
+
+    Returns:
+        None
+    """
+    db_hook = PostgresHook(postgres_conn_id=OUTPUT_CONN_ID)
+    engine = db_hook.get_sqlalchemy_engine()
+    query = text(
+        """
+        SELECT * 
+        FROM ORDERS
+        JOIN ORDER_DETAILS
+        ON ORDERS.ORDER_ID = ORDER_DETAILS.ORDER_ID
+        """
+    )
+    try:
+        conn = engine.connect()
+        results = pd.read_sql_query(query, conn)
+        conn.close()
+        engine.dispose()
+        results = results.T.drop_duplicates().T
+        folder_path = get_folder_path("results")
+        if not os.path.exists(folder_path):
+            os.makedirs(folder_path)
+        results.to_csv(f"{folder_path}/query_result.csv", index=False)
+    except:  # output database is not set
+        print(
+            """
+            Output database is not set. Please consider loading data to output
+            database before querying.
+            """
+        )
+        sys.exit(1)
+
+
 extract = TaskGroup(group_id="extract", dag=indicium_code_challenge)
 
 extract_tables = PythonOperator(
@@ -277,4 +316,10 @@ load_to_analytics = PythonOperator(
     dag=indicium_code_challenge,
 )
 
-extract >> load_to_lfs >> transform >> load_to_analytics
+query = PythonOperator(
+    task_id="query",
+    python_callable=query_and_store_results,
+    dag=indicium_code_challenge,
+)
+
+extract >> load_to_lfs >> transform >> load_to_analytics >> query
