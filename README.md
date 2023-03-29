@@ -119,13 +119,13 @@ Now, spin up the application with
    docker compose up -d [--build]
 ```
 
-*Note> use the --build tag if you make some changes to the docker image and want to build a new image based on those changes.*
+*Note: use the --build tag if you make some changes to the docker image and want to build a new image based on those changes.*
 
 ### Databases
 
-After the Airflow app is up and running, access the airflow webserver on [localhost:8080](localhost:8080) and enter the username and password 'airflow' when requested.
+After the Airflow app is up and running, access the airflow webserver on [localhost:8080](localhost:8080) and enter the username and password `airflow` when requested.
 
-After the login, in the main menu (next to the Airflow logo) select 'Admin' >> 'Connections'. Then, add the records corresponding to the northwind-db and analytics-db services present in the compose file:
+After the login, in the main menu (next to the Airflow logo) select `Admin` >> `Connections`. Then, add the records corresponding to the northwind-db and analytics-db services present in the compose file:
 
 #### Northwind
 
@@ -171,7 +171,7 @@ docker compose run airflow-scheduler airflow dags backfill indicium-code-challen
 
 ### Monitoring execution
 
-At any moment, you can have a comprehensive view of tasks statuses accessing the GUI at [localhost:8080](localhost:8080), selecting the `indicium-code-challenge`dag and accessing the `Links` >> `Graph`view.
+At any moment, you can have a comprehensive view of tasks statuses accessing the GUI at [localhost:8080](localhost:8080), selecting the `indicium-code-challenge` dag and accessing the `Links` >> `Graph` view.
 
 ## Shutting down the containers
 
