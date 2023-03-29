@@ -1,6 +1,5 @@
 # Python
 
-
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -123,7 +122,8 @@ celerybeat.pid
 *.sage.py
 
 # Environments
-.env
+# for this specific project it is fruitful to track .env
+#.env
 .venv
 env/
 venv/
@@ -162,9 +162,7 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 
-
 # Docker
-
 
 .vagrant*
 bin
@@ -189,9 +187,7 @@ vendor/pkg/
 pyenv
 Vagrantfile
 
-
 # VS Code
-
 
 .vscode/*
 !.vscode/settings.json
@@ -207,7 +203,6 @@ Vagrantfile
 *.vsix
 
 # Airflow
-
 
 # Airflow configuration
 airflow.cfg
