@@ -116,8 +116,10 @@ This solution should satisfy all the requirements specified in the challenge and
 Now, spin up the application with
 
 ```sh
-   docker compose up -d --build
+   docker compose up -d [--build]
 ```
+
+*Note> use the --build tag if you make some changes to the docker image and want to build a new image based on those changes.*
 
 ### Databases
 
@@ -151,18 +153,12 @@ Port | 5432
 
 ### Running the pipeline
 
-After all is set up, run the following:
-
-```sh
-docker compose exec -it airflow-scheduler bash
-```
-
-This will give you access to an interactive bash session where you can run the pipeline as follows:
+After all is set up, you can run the pipeline via the CLI commands as follows:
 
 #### Run for today's data
 
 ```sh
-airflow dags trigger indicium-code-challenge
+docker compose run airflow-scheduler airflow dags trigger indicium-code-challenge
 ```
 
 #### Run for past data
@@ -170,8 +166,12 @@ airflow dags trigger indicium-code-challenge
 For example, to run the pipeline for the date March 13, 2023, use the following:
 
 ```sh
-airflow dags backfill indicium-code-challenge --start-date 2023-03-13 --end-date 2023-03-13
+docker compose run airflow-scheduler airflow dags backfill indicium-code-challenge --start-date 2023-03-13 --end-date 2023-03-13
 ```
+
+### Monitoring execution
+
+At any moment, you can have a comprehensive view of tasks statuses accessing the GUI at [localhost:8080](localhost:8080), selecting the `indicium-code-challenge`dag and accessing the `Links` >> `Graph`view.
 
 ## Shutting down the containers
 
