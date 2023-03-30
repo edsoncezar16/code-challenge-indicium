@@ -220,7 +220,8 @@ unittests.db
 airflow/git_version
 airflow/www/static/coverage/
 airflow/www/*.log
-/logs/
+# for this specific project we want airflow logs to be tracked
+#/logs/
 airflow-webserver.pid
 standalone_admin_password.txt
 warnings.txt
@@ -313,7 +314,8 @@ celerybeat-schedule
 *.sage.py
 
 # dotenv
-.env
+# we want to trach .env file for this specific project
+#.env
 .autoenv*.zsh
 
 # virtualenv
