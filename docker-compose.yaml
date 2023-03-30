@@ -51,6 +51,7 @@ x-airflow-common:
   # and uncomment the "build" line below, Then run `docker-compose build` to build the images.
   #image: ${AIRFLOW_IMAGE_NAME:-apache/airflow:2.5.2}
   &airflow-common
+  &airflow-common
   build: .
   environment:
     &airflow-common-env
@@ -63,7 +64,9 @@ x-airflow-common:
     AIRFLOW__CORE__FERNET_KEY: ''
     AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
     AIRFLOW__CORE__LOAD_EXAMPLES: 'true'
+    # to avoid JSON serialization issues with dates and dataframes
     AIRFLOW__CORE__ENABLE_XCOM_PICKLING: 'true'
+    # to allow visualization of gonfigs in the GUI
     AIRFLOW__WEBSERVER__EXPOSE_CONFIG: 'true'
     AIRFLOW__API__AUTH_BACKENDS: 'airflow.api.auth.backend.basic_auth,airflow.api.auth.backend.session'
     # yamllint disable rule:line-length
@@ -98,16 +101,20 @@ services:
       - postgres-db-volume:/var/lib/postgresql/data
     healthcheck:
       test: [ "CMD", "pg_isready", "-U", "airflow" ]
+      test: [ "CMD", "pg_isready", "-U", "airflow" ]
       interval: 10s
       retries: 5
       start_period: 5s
     restart: always
+    domainname: "airflow-training"
 
   redis:
     image: redis:latest
+    domainname: "airflow-training"
     expose:
       - 6379
     healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
       test: [ "CMD", "redis-cli", "ping" ]
       interval: 10s
       timeout: 30s
@@ -121,6 +128,13 @@ services:
     ports:
       - "8080:8080"
     healthcheck:
+      test:
+        [
+          "CMD",
+          "curl",
+          "--fail",
+          "http://localhost:8080/health"
+        ]
       test:
         [
           "CMD",
@@ -142,6 +156,13 @@ services:
     <<: *airflow-common
     command: scheduler
     healthcheck:
+      test:
+        [
+          "CMD",
+          "curl",
+          "--fail",
+          "http://localhost:8974/health"
+        ]
       test:
         [
           "CMD",
@@ -185,6 +206,11 @@ services:
     <<: *airflow-common
     command: triggerer
     healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          'airflow jobs check --job-type TriggererJob --hostname "$${HOSTNAME}"'
+        ]
       test:
         [
           "CMD-SHELL",
@@ -313,8 +339,10 @@ services:
       airflow-init:
         condition: service_completed_successfully
 
+
   northwind-db:
     image: postgres:12
+    domainname: "airflow-training"
     environment:
       POSTGRES_DB: northwind
       POSTGRES_USER: northwind_user
@@ -327,15 +355,32 @@ services:
 
   analytics-db:
     image: postgres:12
+    domainname: "airflow-training"
     environment:
       POSTGRES_DB: analytics
       POSTGRES_USER: datanauta
       POSTGRES_PASSWORD: dataforsmartdecisions
     volumes:
       - analytics-db-volume:/var/lib/analytics/data
+      # change configuration to expose another port rathen than 5432
+      # needed because in ACI no 2 services can expose the same port
+      # and port mappings are no allowed
+      - ./analytics_config:/etc/postgresql
     ports:
-      - 5434:5432
+      - 5434:5434
 volumes:
   postgres-db-volume:
+    driver: azure_file
+    driver_opts:
+      share-name: codechallengedata
+      storage-account-name: codechallengevolumes
   indicium-lfs:
+    driver: azure_file
+    driver_opts:
+      share-name: codechallengedata
+      storage-account-name: codechallengevolumes
   analytics-db-volume:
+    driver: azure_file
+    driver_opts:
+      share-name: codechallengedata
+      storage-account-name: codechallengevolumes
