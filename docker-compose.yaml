@@ -344,7 +344,7 @@ services:
       # change configuration to expose another port rathen than 5432
       # needed because in ACI no 2 services can expose the same port
       # and port mappings are no allowed
-      - ./analytics_config:/etc/postgresql
+      - analytics-config:/etc/postgresql
     ports:
       - 5434:5434
 volumes:
