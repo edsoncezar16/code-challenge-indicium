@@ -414,6 +414,9 @@ log.txt*
 # Terraform variables
 *.tfvars
 
+#Terraform lock files
+**infra
+**/.terraform.lock*
 # Might be generated when you build wheels
 pip-wheel-metadata
 
