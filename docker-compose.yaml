@@ -158,7 +158,7 @@ services:
       resources:
         reservations:
           cpus: '0.3'
-    command: scheduler
+    command: airflow scheduler
     healthcheck:
       test:
         [
@@ -184,7 +184,7 @@ services:
       resources:
         reservations:
           cpus: '0.3'
-    command: celery worker
+    command: airflow celery worker
     healthcheck:
       test:
         - "CMD-SHELL"
@@ -210,7 +210,7 @@ services:
       resources:
         reservations:
           cpus: '0.3'
-    command: triggerer
+    command: airflow triggerer
     healthcheck:
       test:
         [
@@ -335,7 +335,7 @@ services:
       resources:
         reservations:
           cpus: '0.3'
-    command: celery flower
+    command: airflow celery flower
     profiles:
       - flower
     ports:
