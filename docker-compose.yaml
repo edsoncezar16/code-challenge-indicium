@@ -93,6 +93,10 @@ x-airflow-common:
 services:
   postgres:
     image: postgres:13
+    deploy:
+      resources:
+        reservations:
+          cpus: '0.3'
     environment:
       POSTGRES_USER: airflow
       POSTGRES_PASSWORD: airflow
@@ -109,6 +113,10 @@ services:
 
   redis:
     image: redis:latest
+    deploy:
+      resources:
+        reservations:
+          cpus: '0.3'
     domainname: "airflow-training"
     expose:
       - 6379
@@ -122,6 +130,10 @@ services:
 
   airflow-webserver:
     <<: *airflow-common
+    deploy:
+      resources:
+        reservations:
+          cpus: '0.3'
     command: webserver
     ports:
       - "8080:8080"
@@ -145,6 +157,10 @@ services:
 
   airflow-scheduler:
     <<: *airflow-common
+    deploy:
+      resources:
+        reservations:
+          cpus: '0.3'
     command: scheduler
     healthcheck:
       test:
@@ -167,6 +183,10 @@ services:
 
   airflow-worker:
     <<: *airflow-common
+    deploy:
+      resources:
+        reservations:
+          cpus: '0.3'
     command: celery worker
     healthcheck:
       test:
@@ -189,6 +209,10 @@ services:
 
   airflow-triggerer:
     <<: *airflow-common
+    deploy:
+      resources:
+        reservations:
+          cpus: '0.3'
     command: triggerer
     healthcheck:
       test:
@@ -208,6 +232,10 @@ services:
 
   airflow-init:
     <<: *airflow-common
+    deploy:
+      resources:
+        reservations:
+          cpus: '0.3'
     # yamllint disable rule:line-length
     command:
       - /bin/bash
@@ -286,6 +314,10 @@ services:
 
   airflow-cli:
     <<: *airflow-common
+    deploy:
+      resources:
+        reservations:
+          cpus: '0.3'
     profiles:
       - debug
     environment:
@@ -302,6 +334,10 @@ services:
   # See: https://docs.docker.com/compose/profiles/
   flower:
     <<: *airflow-common
+    deploy:
+      resources:
+        reservations:
+          cpus: '0.3'
     command: celery flower
     profiles:
       - flower
@@ -321,6 +357,10 @@ services:
 
   northwind-db:
     image: postgres:12
+    deploy:
+      resources:
+        reservations:
+          cpus: '0.3'
     domainname: "airflow-training"
     environment:
       POSTGRES_DB: northwind
@@ -334,6 +374,10 @@ services:
 
   analytics-db:
     image: postgres:12
+    deploy:
+      resources:
+        reservations:
+          cpus: '0.3'
     domainname: "airflow-training"
     environment:
       POSTGRES_DB: analytics
