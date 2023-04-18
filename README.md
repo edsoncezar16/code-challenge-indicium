@@ -1,17 +1,16 @@
 # code-challenge
+
 Indicium code challenge for Software Developer focusing on data projects
 
 # Indicium Tech Code Challenge
 
 Code challenge for Software Developer with focus in data projects.
 
-
 ## Context
 
 At Indicium we have many projects where we develop the whole data pipeline for our client, from extracting data from many data sources to loading this data at its final destination, with this final destination varying from a data warehouse for a Business Intelligency tool to an api for integrating with third party systems.
 
 As a software developer with focus in data projects your mission is to plan, develop, deploy, and maintain a data pipeline.
-
 
 ## The Challenge
 
@@ -21,12 +20,11 @@ The CSV file represents details of orders from a ecommerce system.
 
 The database provided is a sample database provided by microsoft for education purposes called northwind, the only difference is that the order_detail table does not exists in this database you are beeing provided with.This order_details table is represented by the CSV file we provide.
 
-Schema of the original Northwind Database: 
+Schema of the original Northwind Database:
 
 ![image](https://user-images.githubusercontent.com/49417424/105997621-9666b980-608a-11eb-86fd-db6b44ece02a.png)
 
 Your mission is to build a pipeline that extracts the data everyday from both sources and write the data first to local disk, and second to a database of your choice. For this challenge, the CSV file and the database will be static, but in any real world project, both data sources would be changing constantly.
-
 
 Its important that all writing steps are isolated from each other, you shoud be able to run any step without executing the others.
 
@@ -40,7 +38,7 @@ For the first step, where you write data to local disk, you should write one fil
 
 you are free to chose the naming and the format of the file you are going to save.
 
-At step 2, you should load the data from the local filesystem to the final database that you chosed. 
+At step 2, you should load the data from the local filesystem to the final database that you chosed.
 
 The final goal is to be able to run a query that shows the orders and its details. The Orders are placed in a table called **orders** at the postgres Northwind database. The details are placed at the csv file provided, and each line has an **order_id** field pointing the **orders** table.
 
@@ -49,8 +47,6 @@ How you are going to build this query will heavily depend on which database you 
 The pipeline will look something like this:
 
 ![image](https://user-images.githubusercontent.com/49417424/105993225-e2aefb00-6084-11eb-96af-3ec3716b151a.png)
-
-
 
 ## Requirements
 
@@ -71,8 +67,8 @@ The pipeline will look something like this:
 ## Setup of the source database
 
 The source database can be set up using docker compose.
-You can install following the instructions at 
-https://docs.docker.com/compose/install/
+You can install following the instructions at
+<https://docs.docker.com/compose/install/>
 
 With docker compose installed simply run
 
@@ -88,3 +84,6 @@ You can use any language you like, but keep in mind that we will have to run you
 You are free to use opensource libs and frameworks, but also keep in mind that **you have to write code**. Point and click tools are not allowed.
 
 Thank you for participating!
+
+- Repo owner or admin
+- Other community or team contact
