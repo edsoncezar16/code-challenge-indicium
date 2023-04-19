@@ -92,7 +92,6 @@ To address the Indicium Tech Code Challenge, we will use Meltano, a powerful ope
 
 1. Install Meltano following the instructions in the [official documentation](https://docs.meltano.com/getting-started/installation).
 
-
 ### Setup Source and Target Database
 
 1. Run `docker compose up` to set up the source PostgreSQL Northwind database using the provided `docker-compose.yml` file.
