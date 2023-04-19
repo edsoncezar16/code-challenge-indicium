@@ -108,20 +108,20 @@ export PG_PASSWORD=thewindisblowing
 export PG_DATABASE=northwind
 
 export TARGET_PG_HOST=localhost
-export TARGET_PG_PORT=5433
+export TARGET_PG_PORT=target_port
 export TARGET_PG_USER=target_user
 export TARGET_PG_PASSWORD=target_password
 export TARGET_PG_DATABASE=target_db
 ```
 
-Replace `target_user`, `target_password`, and `target_db` with your desired credentials and database name.
+Replace `target_port` `target_user`, `target_password`, and `target_db` with an available port, your desired credentials and database name.
 
 Load the environment variables: `source .env.`
 
 Then, execute:
 
 ``` bash
-docker run -d --name analytics-db -p 5433:5432 -e POSTGRES_USER="$TARGET_PG_USER" -e POSTGRES_PASSWORD="$TARGET_PG_PASSWORD" -e POSTGRES_DB="$TARGET_PG_DATABASE" postgres:latest
+docker run -d --name analytics-db -p "$TARGET_PG_PORT":5432 -e POSTGRES_USER="$TARGET_PG_USER" -e POSTGRES_PASSWORD="$TARGET_PG_PASSWORD" -e POSTGRES_DB="$TARGET_PG_DATABASE" postgres:latest
 ```
 
 ### Create Meltano Project
