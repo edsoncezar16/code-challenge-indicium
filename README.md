@@ -371,3 +371,6 @@ meltano schedule list
 ```
 
 This command will display a list of all scheduled pipelines in your Meltano project and their current status.
+
+- Repo owner or admin
+- Other community or team contact
