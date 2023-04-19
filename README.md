@@ -88,9 +88,10 @@ To address the Indicium Tech Code Challenge, we will use Meltano, a powerful ope
 
 ### Prerequisites
 
+1. Install Docker and Docker Compose following the instructions in the [official documentation](https://docs.docker.com/compose/install/).
+
 1. Install Meltano following the instructions in the [official documentation](https://docs.meltano.com/getting-started/installation).
 
-1. Install Docker and Docker Compose following the instructions in the [official documentation](https://docs.docker.com/compose/install/).
 
 ### Setup Source and Target Database
 
