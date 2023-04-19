@@ -366,7 +366,7 @@ This command will start the Meltano scheduler, which will run the scheduled pipe
 
 To check the status of the scheduled pipelines, you can use the following command:
 
-``` sh
+``` bash
 meltano schedule list
 ```
 
