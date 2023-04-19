@@ -94,29 +94,11 @@ To address the Indicium Tech Code Challenge, we will use Meltano, a powerful ope
 
 ### Setup Source and Target Database
 
-1. Run `docker compose up` to set up the source PostgreSQL Northwind database using the provided `docker-compose.yml` file.
+1. Run `docker compose up -d` to set up the source PostgreSQL Northwind database using the provided `docker-compose.yml` file.
 
-1. Ensure you have a PostgreSQL database set up for the target. If not, you can create one using Docker:
+1. Ensure you have a PostgreSQL database set up for the target.
 
-``` bash
-docker run -d --name analytics-db -p 5433:5432 -e POSTGRES_USER=target_user -e POSTGRES_PASSWORD=target_password -e POSTGRES_DB=target_db postgres:latest
-```
-
-Replace `target_user`, `target_password`, and `target_db` with your desired credentials and database name.
-
-### Create Meltano Project
-
-1. Create a new Meltano project using `meltano init indicium-code-challenge`.
-
-1. Change to the project directory: `cd indicium-code-challenge`.
-
-## Configure Source and Target Database Connections
-
-1. Add the source PostgreSQL connector: `meltano add extractor tap-postgres`.
-
-1. Add the target PostgreSQL connector: `meltano add loader target-postgres`.
-
-1. Create a `.env` file in the project directory and configure the source and target PostgreSQL connection settings:
+Create a `.env` file in the project directory and configure the source and target PostgreSQL connection settings:
 
 ``` bash
 export PG_HOST=localhost
@@ -132,9 +114,27 @@ export TARGET_PG_PASSWORD=target_password
 export TARGET_PG_DATABASE=target_db
 ```
 
-Replace `target_user`, `target_password`, and `target_db` with your actual credentials and database name.
+Replace `target_user`, `target_password`, and `target_db` with your desired credentials and database name.
 
-Load the environment variables: `source .env`.
+Load the environment variables: `source .env.`
+
+Then, execute:
+
+``` bash
+docker run -d --name analytics-db -p 5433:5432 -e POSTGRES_USER="$TARGET_PG_USER" -e POSTGRES_PASSWORD="$TARGET_PG_PASSWORD" -e POSTGRES_DB="$TARGET_PG_DATABASE" postgres:latest
+```
+
+### Create Meltano Project
+
+1. Create a new Meltano project using `meltano init indicium-code-challenge`.
+
+1. Change to the project directory: `cd indicium-code-challenge`.
+
+## Configure Source and Target Database Connections
+
+1. Add the source PostgreSQL connector: `meltano add extractor tap-postgres`.
+
+1. Add the target PostgreSQL connector: `meltano add loader target-postgres`.
 
 ### Configure CSV Source
 
