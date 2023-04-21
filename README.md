@@ -18,6 +18,7 @@ The CSV file represents details of orders from a ecommerce system.
 The database provided is a sample database provided by microsoft for education purposes called northwind, the only difference is that the order_detail table does not exists in this database you are beeing provided with.This order_details table is represented by the CSV file we provide.
 
 Schema of the original Northwind Database:
+Schema of the original Northwind Database:
 
 ![image](https://user-images.githubusercontent.com/49417424/105997621-9666b980-608a-11eb-86fd-db6b44ece02a.png)
 
@@ -35,6 +36,7 @@ For the first step, where you write data to local disk, you should write one fil
 
 you are free to chose the naming and the format of the file you are going to save.
 
+At step 2, you should load the data from the local filesystem to the final database that you chosed.
 At step 2, you should load the data from the local filesystem to the final database that you chosed.
 
 The final goal is to be able to run a query that shows the orders and its details. The Orders are placed in a table called **orders** at the postgres Northwind database. The details are placed at the csv file provided, and each line has an **order_id** field pointing the **orders** table.
@@ -64,6 +66,8 @@ The pipeline will look something like this:
 ## Setup of the source database
 
 The source database can be set up using docker compose.
+You can install following the instructions at
+<https://docs.docker.com/compose/install/>
 You can install following the instructions at
 <https://docs.docker.com/compose/install/>
 
