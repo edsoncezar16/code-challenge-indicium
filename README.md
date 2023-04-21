@@ -86,250 +86,112 @@ Thank you for participating!
 
 To address the Indicium Tech Code Challenge, we will use Meltano, a powerful open-source data pipeline tool. Meltano simplifies the process of extracting, transforming, and loading data from various sources, making it a perfect fit for this challenge.
 
-### Prerequisites
+### Setup
 
-1. Install Docker and Docker Compose following the instructions in the [official documentation](https://docs.docker.com/compose/install/).
-
-1. Install Meltano following the instructions in the [official documentation](https://docs.meltano.com/getting-started/installation).
-
-### Setup Source and Target Database
-
-1. Run `docker compose up -d` to set up the source PostgreSQL Northwind database using the provided `docker-compose.yml` file.
-
-1. Ensure you have a PostgreSQL database set up for the target.
-
-Create a `.env` file in the project directory and configure the source and target PostgreSQL connection settings:
+Create a `.env` file in the project directory and configure environment variables:
 
 ``` bash
-export PG_HOST=localhost
-export PG_PORT=5432
-export PG_USER=northwind_user
-export PG_PASSWORD=thewindisblowing
-export PG_DATABASE=northwind
+TAP_POSTGRES_HOST=db
+TAP_POSTGRES_PORT=5432
+TAP_POSTGRES_USER=northwind_user
+TAP_POSTGRES_PASSWORD=thewindisblowing
+TAP_POSTGRES_DBNAME=northwind
+TAP_POSTGRES_DEFAULT_REPLICATION_METHOD=INCREMENTAL
 
-export TARGET_PG_HOST=localhost
-export TARGET_PG_PORT=target_port
-export TARGET_PG_USER=target_user
-export TARGET_PG_PASSWORD=target_password
-export TARGET_PG_DATABASE=target_db
+TARGET_POSTGRES_HOST=analytics-db
+TARGET_POSTGRES_PORT=5432
+TARGET_POSTGRES_USER=target_user
+TARGET_POSTGRES_PASSWORD=target_password
+TARGET_POSTGRES_DBNAME=target_db
+TARGET_POSTGRES_DEFAULT_TARGET_SCHEMA=public
+
+MELTANO_ENVIRONMENT=dev
 ```
 
 Replace `target_port` `target_user`, `target_password`, and `target_db` with an available port, your desired credentials and database name.
 
-Load the environment variables: `source .env.`
+Run `source .env` and `docker compose up -d`. This will setup a `db`service correspondent to the Northwind database, a `analytics-db` service correpondent to the target Postgres database, and a `server`service where we can execute our meltano commands.
 
-Then, execute:
+### Configure and Run the Postgres to Local File System Integration
 
-``` bash
-docker run -d --name analytics-db -p "$TARGET_PG_PORT":5432 -e POSTGRES_USER="$TARGET_PG_USER" -e POSTGRES_PASSWORD="$TARGET_PG_PASSWORD" -e POSTGRES_DB="$TARGET_PG_DATABASE" postgres:latest
-```
+1. Add the source PostgreSQL extractor: `docker exec server meltano add extractor tap-postgres`.
 
-### Create Meltano Project
+1. Set up the Northwind database for incremental extraction by running `docker exec db psql -U northwind_user -d northwind -f /home/scripts/set-incremental-public.sql`. This will add an `updated_at` column to serve as a replication key for each table in the public schema.
 
-1. Create a new Meltano project using `meltano init indicium-code-challenge`.
+1. Configure the replication key for incremental extraction: `docker exec server meltano config tap-postgres set _metadata '*' replication-key updated_at`.
 
-1. Change to the project directory: `cd indicium-code-challenge`.
+1. Add the target csv loader for postgres data: `docker exec server meltano add loader target-csv--postgres --inherit-from target-csv --variant meltanolabs`.
 
-## Configure Source and Target Database Connections
-
-1. Add the source PostgreSQL connector: `meltano add extractor tap-postgres`.
-
-1. Add the target PostgreSQL connector: `meltano add loader target-postgres`.
-
-### Configure CSV Source
-
-1. Add the CSV extractor: `meltano add extractor tap-csv`.
-
-1. Create a `csv_config.yaml` file in the project directory with the following content:
-
-``` yaml
-file: "data/order_details.csv"
-delimiter: ","
-key_properties:
-  - order_id
-```
-
-Add the configuration file to Meltano: `meltano config tap-csv set --file csv_config.yaml`.
-
-### Add and Configure Target CSV Loader
-
-1. Add the target CSV loader: `meltano add loader target-csv`.
-
-1. Create a `csv_config.yaml` file in the project directory with the following content:
-
-``` yaml
-delimiter: ","
-quotechar: '"'
-destination_path: "data/"
-
-    Add the configuration file to Meltano: meltano config target-csv set --file csv_config.yaml.
-```
-
-Update Meltano Configuration
-
-Update the meltano.yml file in the project directory to include the target CSV loader:
-
-``` yaml
-plugins:
-  extractors:
-    - name: tap-postgres
-      variant: singer-io
-      namespace: meltano
-      config:
-        host_env: PG_HOST
-        port_env: PG_PORT
-        user_env: PG_USER
-        password_env: PG_PASSWORD
-        dbname_env: PG_DATABASE
-    - name: tap-csv
-      variant: singer-io
-      namespace: meltano
-      config:
-        key_properties:
-          - order_id
-  loaders:
-    - name: target-csv
-      variant: singer-io
-      namespace: meltano
-      config:
-        delimiter: ","
-        quotechar: '"'
-        destination_path: "data/"
-```
-
-### Run the Data Pipeline to Save Data to Local File System
-
-1. Run the data pipeline for PostgreSQL tables to save data to the local file system: `meltano elt tap-postgres target-csv --job_id=postgres-lfs-EL`.
-
-1. Run the data pipeline for the CSV file to save data to the local file system: `meltano elt tap-csv target-csv --job_id=csv-lfs-EL`.
-
-At this point, the extracted data will be saved as CSV files in the `data/` directory. Each file will be stored in a folder named after the table, and each folder will have a date-based folder structure.
-
-### Load Data from Local File System to Target PostgreSQL Database
-
-To load data from the local file system to the target PostgreSQL database using Meltano, we can create a custom loader plugin. This custom loader will read the CSV files generated by the target-csv loader and insert the data into the target PostgreSQL database.
-
-#### Create a Custom Meltano Loader
-
-1. Create a new directory called `custom_loader` in your Meltano project directory.
-
-1. Inside the `custom_loader` directory, create a `meltano.yml` file with the following content:
-
-``` yaml
-name: custom-loader
-namespace: custom
-entrypoint: custom_loader.loader:CustomLoader
-```
-
-Create a `loader.py` file inside the `custom_loader` directory with the following content:
+1. Specify the following configuration after running `docker exec -i server meltano config target-csv--postgres set --interactive`:
 
 ``` python
-import csv
-import os
-import psycopg2
-from meltano.core.loader import Loader
-from meltano.core.utils import truthy
-from meltano.core.config_service import ConfigService
-
-
-class CustomLoader(Loader):
-    def load(self, context):
-        # Connect to the target PostgreSQL database
-        conn = psycopg2.connect(
-            host=os.getenv("TARGET_PG_HOST"),
-            port=os.getenv("TARGET_PG_PORT"),
-            user=os.getenv("TARGET_PG_USER"),
-            password=os.getenv("TARGET_PG_PASSWORD"),
-            dbname=os.getenv("TARGET_PG_DATABASE"),
-        )
-
-        # Load CSV files from the local file system
-        source_directory = "data/"
-        for root, dirs, files in os.walk(source_directory):
-            for file in files:
-                if file.endswith(".csv"):
-                    table_name = os.path.splitext(file)[0]
-                    file_path = os.path.join(root, file)
-
-                    with open(file_path, mode="r") as csv_file:
-                        csv_reader = csv.DictReader(csv_file)
-                        columns = csv_reader.fieldnames
-
-                        # Create a table in the target PostgreSQL database
-                        with conn.cursor() as cursor:
-                            create_table_sql = f"CREATE TABLE IF NOT EXISTS {table_name} ({', '.join([f'{column} TEXT' for column in columns])})"
-                            cursor.execute(create_table_sql)
-                            conn.commit()
-
-                        # Load data from the CSV file into the target PostgreSQL database
-                        with conn.cursor() as cursor:
-                            for row in csv_reader:
-                                insert_sql = f"INSERT INTO {table_name} ({', '.join(columns)}) VALUES ({', '.join(['%s' for _ in columns])})"
-                                cursor.execute(insert_sql, list(row.values()))
-                            conn.commit()
-
-        # Close the connection to the target PostgreSQL database
-        conn.close()
+file_naming_scheme: postgres-{datestamp}-{stream_name}.csv
+output_path_prefix: output/
 ```
 
-In your Meltano project directory, run `meltano discover all` to discover the custom loader plugin.
+Run the integration pipeline: `docker exec server meltano run tap-postgres target-csv--postgres`.
 
-Add the custom loader plugin to your Meltano project: `meltano add loader custom-loader`.
+### Configure and Run the CSV to Local File System Integration
 
-### Configure the Data Pipeline
+1. Add the source CSV extractor: `docker exec server meltano add extractor tap-csv--northwind --inherit-from tap-csv`.
 
-Create a `meltano.yml` file in the project directory, which will define the data pipeline with the extractors and loaders added earlier.
+1. Run `docker exec -i server meltano config tap-csv--northwind set --interactive` and adjust the following configuration:
 
-``` yaml
-plugins:
-  extractors:
-    - name: tap-postgres
-      variant: singer-io
-      namespace: meltano
-      config:
-        host_env: PG_HOST
-        port_env: PG_PORT
-        user_env: PG_USER
-        password_env: PG_PASSWORD
-        dbname_env: PG_DATABASE
-    - name: tap-csv
-      variant: singer-io
-      namespace: meltano
-      config:
-        key_properties:
-          - order_id
-  loaders:
-    - name: target-csv
-      variant: singer-io
-      namespace: meltano
-      config:
-        delimiter: ","
-        quotechar: '"'
-        destination_path: "data/"
-    - name: target-postgres
-      variant: singer-io
-      namespace: meltano
-      config:
-        host_env: TARGET_PG_HOST
-        port_env: TARGET_PG_PORT
-        user_env: TARGET_PG_USER
-        password_env: TARGET_PG_PASSWORD
-        dbname_env: TARGET_PG_DATABASE
-    - name: custom-loader
-      namespace: custom
-      config: {}
-
+``` python
+files: [
+  {
+    "entity": "order_details",
+    "path": "data/order_details.csv"
+    "keys": ["order_id", "product_id"]
+  }
+]
 ```
 
-Now you can use the custom loader to load data from the local file system to the target PostgreSQL database: `meltano elt custom-loader --job_id=lfs-analytics-EL`.
+1. Add another csv loader for data extracted from the csv file: `docker exec server meltano add loader target-csv--csv --inherit-from target-csv --variant meltanolabs`.
 
-The custom loader will read the locally saved CSV files generated by the `target-csv` loader and insert the data into the target PostgreSQL database.
+1. Specify the following configuration after running `docker exec -i server meltano config target-csv--csv set --interactive`:
+
+``` python
+file_naming_scheme: csv-{datestamp}-{stream_name}.csv
+output_path_prefix: output/
+```
+
+1. Run the integration pipeline: `docker exec server meltano run tap-csv--northwind target-csv--csv`.
+
+At this point, the extracted data will be saved as CSV files in the `output/` directory. Each file will be named after the table, and have a date-based name structure.
+
+### Configure and Run the Local File System to Analytics Integration
+
+To load data from the local file system to the target PostgreSQL database using Meltano, we will configure a new csv extractor to get some data generated in the first step from the local file system, and then insert the data into the target PostgreSQL database with the postgres loader added earlier.
+
+1. Add another CSV extractor: `docker exec server meltano add extractor tap-csv--lfs --inherit-from tap-csv`.
+
+1. Run `docker exec -i server meltano config tap-csv--lfs set --interactive` and adjust the following configuration:
+
+``` python
+files: [
+  {
+    "entity": "order_details",
+    "path": "output/csv-<datestamp>-order_details.csv"
+    "keys": ["order_id", "product_id"]
+  },
+  {
+    "entity": "orders",
+    "path": "output/postgres-<datestamp>-public-orders.csv"
+    "keys": ["order_id"]
+  }
+]
+```
+
+Replace `<datestamp>` with a date where the pipeline has already run. Otherwise, the pipeline will fail, but then you can run the Northwind to LFS for the required date first, and then execute this step again.
+
+Then, we run the integration pipeline: `docker exec server meltano run tap-csv--lfs target-postgres`.
 
 ### Query the Final Database
 
 After running the data pipeline, you can query the analytics database and export the result as a `.csv` as follows:
 
-1. Connect to the analytics database: `docker exec -it analytics-db psql -U target_user`
+1. Connect to the analytics database: `docker exec -it analytics-db psql -U target_user -d target_db`
 
 1. Once you are connected, you can run a query to select the data you want to export to a CSV file. For example, a query that satisfies the challenge requirement is:
 
@@ -339,38 +201,15 @@ After running the data pipeline, you can query the analytics database and export
     FROM orders AS o
     JOIN order_details AS od
     ON o.ORDER_ID = od.ORDER_ID
-) to 'data/query-results.csv' with csv header
+) to '/home/data/query-results.csv' with csv header
 ```
 
-### Schedule the Pipeline with Meltano
+### Schedule the Pipelines with Meltano
 
-Schedule the data pipeline for the PostgreSQL tables:
+1. Northwind to LFS:  `docker exec server meltano schedule postgres-to-lfs --extractor tap-postgres --loader target-csv--postgres --interval @daily`
 
-``` bash
-meltano schedule postgres_pipeline tap-postgres target-csv custom-loader @daily --transform=run
-```
+1. CSV to LFS:  `docker exec server meltano schedule csv-to-lfs --extractor tap-csv--northwind --loader target-csv--csv --interval @daily`
 
-Schedule the data pipeline for the CSV file:
+1. LFS to Analytics:  `docker exec server meltano schedule lfs-to-analytics --extractor tap-csv--lfs --loader target-postgres --interval @daily`
 
-``` bash
-meltano schedule csv_pipeline tap-csv target-csv custom-loader @daily --transform=run
-```
-
-Ensure the Meltano scheduler is running. You can start the scheduler with the following command:
-
-``` bash
-meltano schedule start
-```
-
-This command will start the Meltano scheduler, which will run the scheduled pipelines at the specified intervals. In this case, both the `postgres_pipeline` and `csv_pipeline` will run daily.
-
-To check the status of the scheduled pipelines, you can use the following command:
-
-``` bash
-meltano schedule list
-```
-
-This command will display a list of all scheduled pipelines in your Meltano project and their current status.
-
-- Repo owner or admin
-- Other community or team contact
+1. Run the scheduled pipes: `docker compose exec server meltano invoke airflow scheduler -D`.
