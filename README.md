@@ -90,6 +90,10 @@ Thank you for participating!
 
 To address the Indicium Tech Code Challenge, we will use Meltano, a powerful open-source data pipeline tool. Meltano simplifies the process of extracting, transforming, and loading data from various sources, making it a perfect fit for this challenge.
 
+### Prerequisites
+
+1. Install Docker and Docker Compose following the instructions in the [official documentation](https://docs.docker.com/compose/install/).
+
 ### Setup
 
 Create a `.env` file in the project directory and configure environment variables:
@@ -114,7 +118,7 @@ MELTANO_ENVIRONMENT=dev
 
 Replace `target_port` `target_user`, `target_password`, and `target_db` with an available port, your desired credentials and database name.
 
-Run `source .env` and `docker compose up -d`. This will setup a `db`service correspondent to the Northwind database, a `analytics-db` service correpondent to the target Postgres database, and a `server`service where we can execute our meltano commands.
+Run `source .env` and `docker compose up -d`. This will setup a `db` service correspondent to the Northwind database, an `analytics-db` service correpondent to the target Postgres database, and a `server` service where we can execute our meltano commands.
 
 ### Configure and Run the Postgres to Local File System Integration
 
