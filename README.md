@@ -18,7 +18,6 @@ The CSV file represents details of orders from a ecommerce system.
 The database provided is a sample database provided by microsoft for education purposes called northwind, the only difference is that the order_detail table does not exists in this database you are beeing provided with.This order_details table is represented by the CSV file we provide.
 
 Schema of the original Northwind Database:
-Schema of the original Northwind Database:
 
 ![image](https://user-images.githubusercontent.com/49417424/105997621-9666b980-608a-11eb-86fd-db6b44ece02a.png)
 
@@ -36,7 +35,6 @@ For the first step, where you write data to local disk, you should write one fil
 
 you are free to chose the naming and the format of the file you are going to save.
 
-At step 2, you should load the data from the local filesystem to the final database that you chosed.
 At step 2, you should load the data from the local filesystem to the final database that you chosed.
 
 The final goal is to be able to run a query that shows the orders and its details. The Orders are placed in a table called **orders** at the postgres Northwind database. The details are placed at the csv file provided, and each line has an **order_id** field pointing the **orders** table.
@@ -68,8 +66,6 @@ The pipeline will look something like this:
 The source database can be set up using docker compose.
 You can install following the instructions at
 <https://docs.docker.com/compose/install/>
-You can install following the instructions at
-<https://docs.docker.com/compose/install/>
 
 With docker compose installed simply run
 
@@ -89,10 +85,6 @@ Thank you for participating!
 ## Solution
 
 To address the Indicium Tech Code Challenge, we will use Meltano, a powerful open-source data pipeline tool. Meltano simplifies the process of extracting, transforming, and loading data from various sources, making it a perfect fit for this challenge.
-
-### Prerequisites
-
-1. Install Docker and Docker Compose following the instructions in the [official documentation](https://docs.docker.com/compose/install/).
 
 ### Setup
 
@@ -118,82 +110,9 @@ MELTANO_ENVIRONMENT=dev
 
 Replace `target_port` `target_user`, `target_password`, and `target_db` with an available port, your desired credentials and database name.
 
-Run `source .env` and `docker compose up -d`. This will setup a `db` service correspondent to the Northwind database, an `analytics-db` service correpondent to the target Postgres database, and a `server` service where we can execute our meltano commands.
+Run `source .env` and `docker compose up -d`. This will setup a `db` service correspondent to the Northwind database, an `analytics-db` service correpondent to the target Postgres database, and a `server` service which contains meltano and all necessary plugins for our project.
 
-### Configure and Run the Postgres to Local File System Integration
-
-1. Add the source PostgreSQL extractor: `docker exec server meltano add extractor tap-postgres`.
-
-1. Set up the Northwind database for incremental extraction by running `docker exec db psql -U northwind_user -d northwind -f /home/scripts/set-incremental-public.sql`. This will add an `updated_at` column to serve as a replication key for each table in the public schema.
-
-1. Configure the replication key for incremental extraction: `docker exec server meltano config tap-postgres set _metadata '*' replication-key updated_at`.
-
-1. Add the target csv loader for postgres data: `docker exec server meltano add loader target-csv--postgres --inherit-from target-csv --variant meltanolabs`.
-
-1. Specify the following configuration after running `docker exec -i server meltano config target-csv--postgres set --interactive`:
-
-``` python
-file_naming_scheme: postgres-{datestamp}-{stream_name}.csv
-output_path_prefix: output/
-```
-
-Run the integration pipeline: `docker exec server meltano run tap-postgres target-csv--postgres`.
-
-### Configure and Run the CSV to Local File System Integration
-
-1. Add the source CSV extractor: `docker exec server meltano add extractor tap-csv--northwind --inherit-from tap-csv`.
-
-1. Run `docker exec -i server meltano config tap-csv--northwind set --interactive` and adjust the following configuration:
-
-``` python
-files: [
-  {
-    "entity": "order_details",
-    "path": "data/order_details.csv"
-    "keys": ["order_id", "product_id"]
-  }
-]
-```
-
-1. Add another csv loader for data extracted from the csv file: `docker exec server meltano add loader target-csv--csv --inherit-from target-csv --variant meltanolabs`.
-
-1. Specify the following configuration after running `docker exec -i server meltano config target-csv--csv set --interactive`:
-
-``` python
-file_naming_scheme: csv-{datestamp}-{stream_name}.csv
-output_path_prefix: output/
-```
-
-1. Run the integration pipeline: `docker exec server meltano run tap-csv--northwind target-csv--csv`.
-
-At this point, the extracted data will be saved as CSV files in the `output/` directory. Each file will be named after the table, and have a date-based name structure.
-
-### Configure and Run the Local File System to Analytics Integration
-
-To load data from the local file system to the target PostgreSQL database using Meltano, we will configure a new csv extractor to get some data generated in the first step from the local file system, and then insert the data into the target PostgreSQL database with the postgres loader added earlier.
-
-1. Add another CSV extractor: `docker exec server meltano add extractor tap-csv--lfs --inherit-from tap-csv`.
-
-1. Run `docker exec -i server meltano config tap-csv--lfs set --interactive` and adjust the following configuration:
-
-``` python
-files: [
-  {
-    "entity": "order_details",
-    "path": "output/csv-<datestamp>-order_details.csv"
-    "keys": ["order_id", "product_id"]
-  },
-  {
-    "entity": "orders",
-    "path": "output/postgres-<datestamp>-public-orders.csv"
-    "keys": ["order_id"]
-  }
-]
-```
-
-Replace `<datestamp>` with a date where the pipeline has already run. Otherwise, the pipeline will fail, but then you can run the Northwind to LFS for the required date first, and then execute this step again.
-
-Then, we run the integration pipeline: `docker exec server meltano run tap-csv--lfs target-postgres`.
+To make each table in the Northwind db set up for incremental extraction, rum `docker exec db psql -U northwind_user -d northwind -f /home/scripts/set-incremental-public.sql`.
 
 ### Query the Final Database
 
@@ -214,10 +133,16 @@ After running the data pipeline, you can query the analytics database and export
 
 ### Schedule the Pipelines with Meltano
 
-1. Northwind to LFS:  `docker exec server meltano schedule postgres-to-lfs --extractor tap-postgres --loader target-csv--postgres --interval @daily`
+1. Run the scheduled pipes: `docker exec server meltano invoke airflow scheduler -D`.
 
-1. CSV to LFS:  `docker exec server meltano schedule csv-to-lfs --extractor tap-csv--northwind --loader target-csv--csv --interval @daily`
+### Executing specific tasks
 
-1. LFS to Analytics:  `docker exec server meltano schedule lfs-to-analytics --extractor tap-csv--lfs --loader target-postgres --interval @daily`
+Available tasks:
 
-1. Run the scheduled pipes: `docker compose exec server meltano invoke airflow scheduler -D`.
+- meltano_csv-to-lfs
+- meltano_postgres-to-lfs
+- meltano_lfs-to-analytics
+
+1. Run specific task for today: `docker exec server invoke airflow dags trigger TASK`.
+
+1. Run specific task for past date: `docker exec server invoke airflow backfill -s DATE -e DATE TASK`.

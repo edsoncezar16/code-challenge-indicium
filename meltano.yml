@@ -3,6 +3,18 @@ default_environment: dev
 project_id: 4c286d63-9d1f-4465-94b3-07a22fe89a2f
 environments:
 - name: dev
+  config:
+    plugins:
+      extractors:
+      - name: tap-postgres
+        metadata:
+          '*':
+            replication-key: updated_at
+      loaders:
+      - name: target-csv--postgres
+        config:
+          file_naming_scheme: postgres-{datestamp}-{stream_name}.csv
+          output_path_prefix: output/
 - name: staging
 - name: prod
 plugins:
@@ -13,21 +25,6 @@ plugins:
     metadata:
       '*':
         replication-key: updated_at
-  - name: tap-csv
-    variant: meltanolabs
-    pip_url: git+https://github.com/MeltanoLabs/tap-csv.git
-    config:
-      add_metadata_columns: true
-      files:
-      - entity: orders
-        path: output/public-orders-20230420T191305.csv
-        keys:
-        - order_id
-      - entity: order_details
-        path: output/order_details-20230420T192350.csv
-        keys:
-        - order_id
-        - product_id
   - name: tap-csv--northwind
     inherit_from: tap-csv
     config:
@@ -55,9 +52,6 @@ plugins:
   - name: target-postgres
     variant: transferwise
     pip_url: pipelinewise-target-postgres
-  - name: target-csv
-    variant: hotgluexyz
-    pip_url: git+https://github.com/hotgluexyz/target-csv.git
   - name: target-csv--postgres
     inherit_from: target-csv
     variant: meltanolabs
@@ -81,21 +75,21 @@ plugins:
     variant: meltano
     pip_url: git+https://github.com/meltano/files-airflow.git
 schedules:
-- name: postgres-to-lfs
-  interval: '@daily'
-  extractor: tap-postgres
-  loader: target-csv--postgres
-  transform: skip
-  start_date: 2023-04-21 03:57:24.338147
 - name: csv-to-lfs
-  interval: '@daily'
+  interval: '@once'
   extractor: tap-csv--northwind
-  loader: target-csv--csv
+  loader: target-csv
   transform: skip
-  start_date: 2023-04-21 04:05:10.435865
+  start_date: 2023-04-24 01:18:27.333088
+- name: postgres-to-lfs
+  interval: '@once'
+  extractor: tap-postgres
+  loader: target-csv
+  transform: skip
+  start_date: 2023-04-24 01:19:12.107592
 - name: lfs-to-analytics
-  interval: '@daily'
+  interval: '@once'
   extractor: tap-csv--lfs
   loader: target-postgres
   transform: skip
-  start_date: 2023-04-21 04:06:28.633105
+  start_date: 2023-04-24 01:21:26.837298

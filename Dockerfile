@@ -1,11 +1,21 @@
-FROM apache/airflow:2.5.2-python3.10
+# registry.gitlab.com/meltano/meltano:latest is also available in GitLab Registry
+ARG MELTANO_IMAGE=meltano/meltano:latest
+FROM $MELTANO_IMAGE
 
-WORKDIR /home
+WORKDIR /project
 
-ADD requirements.txt .
-
+# Install any additional requirements
+COPY ./requirements.txt .
 RUN pip install -r requirements.txt
 
-COPY ./data ./data
+# Copy over Meltano project directory
+COPY . .
+RUN meltano install
 
-WORKDIR /opt/airflow
+# Don't allow changes to containerized project files
+ENV MELTANO_PROJECT_READONLY 1
+
+# Expose default port used by `meltano ui`
+EXPOSE 5000
+
+ENTRYPOINT ["meltano"]
