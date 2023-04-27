@@ -1,0 +1,9 @@
+category_id,category_name,description,picture,updated_at
+1,Beverages,"Soft drinks, coffees, teas, beers, and ales",,2023-04-26 17:07:44.614409+00:00
+2,Condiments,"Sweet and savory sauces, relishes, spreads, and seasonings",,2023-04-26 17:07:44.614409+00:00
+3,Confections,"Desserts, candies, and sweet breads",,2023-04-26 17:07:44.614409+00:00
+4,Dairy Products,Cheeses,,2023-04-26 17:07:44.614409+00:00
+5,Grains/Cereals,"Breads, crackers, pasta, and cereal",,2023-04-26 17:07:44.614409+00:00
+6,Meat/Poultry,Prepared meats,,2023-04-26 17:07:44.614409+00:00
+7,Produce,Dried fruit and bean curd,,2023-04-26 17:07:44.614409+00:00
+8,Seafood,Seaweed and fish,,2023-04-26 17:07:44.614409+00:00

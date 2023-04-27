@@ -1,0 +1,7 @@
+version: 1
+default_environment: dev
+environments:
+  - name: dev
+include_paths:
+  - "./pipelines/**/*.yml"
+project_id: 4c286d63-9d1f-4465-94b3-07a22fe89a2f
