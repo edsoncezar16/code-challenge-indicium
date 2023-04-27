@@ -91,6 +91,8 @@ To address the Indicium Tech Code Challenge, we will use Meltano, a powerful ope
 Create a `.env` file in the project directory and configure environment variables:
 
 ``` bash
+# .env.example
+
 TAP_POSTGRES_HOST=db
 TAP_POSTGRES_PORT=5432
 TAP_POSTGRES_USER=northwind_user
@@ -100,9 +102,9 @@ TAP_POSTGRES_DEFAULT_REPLICATION_METHOD=INCREMENTAL
 
 TARGET_POSTGRES_HOST=analytics-db
 TARGET_POSTGRES_PORT=5432
-TARGET_POSTGRES_USER=target_user
-TARGET_POSTGRES_PASSWORD=target_password
-TARGET_POSTGRES_DBNAME=target_db
+TARGET_POSTGRES_USER=datanauta
+TARGET_POSTGRES_PASSWORD=dataforsmartdecisions
+TARGET_POSTGRES_DBNAME=analytics
 TARGET_POSTGRES_DEFAULT_TARGET_SCHEMA=public
 
 MELTANO_ENVIRONMENT=dev
@@ -110,9 +112,23 @@ MELTANO_ENVIRONMENT=dev
 
 Replace `target_port` `target_user`, `target_password`, and `target_db` with an available port, your desired credentials and database name.
 
-Run `source .env` and `docker compose up -d`. This will setup a `db` service correspondent to the Northwind database, an `analytics-db` service correpondent to the target Postgres database, and a `server` service which contains meltano and all necessary plugins for our project.
+Run `source .env` and `docker compose up -d [--build]`. This will setup a `db` service correspondent to the Northwind database, an `analytics-db` service correpondent to the target Postgres database, and a `server` service which contains meltano and all necessary plugins for our project. Use the `--build`flag if you made some changes and want to build an updated image.
 
 To make each table in the Northwind db set up for incremental extraction, rum `docker exec db psql -U northwind_user -d northwind -f /home/scripts/set-incremental-public.sql`.
+
+### Executing specific tasks
+
+Available tasks:
+
+- csv-to-lfs
+- postgres-to-lfs
+- lfs-to-analytics
+
+1. Run specific task for today: `docker exec server meltano run TASK`.
+
+1. Concatenating tasks TASK1 and TASK2: `docker exec server meltano run TASK1 TASK2`.
+
+1. Run specific task for past date: [TBD].
 
 ### Query the Final Database
 
@@ -130,19 +146,3 @@ After running the data pipeline, you can query the analytics database and export
     ON o.ORDER_ID = od.ORDER_ID
 ) to '/home/data/query-results.csv' with csv header
 ```
-
-### Schedule the Pipelines with Meltano
-
-1. Run the scheduled pipes: `docker exec server meltano invoke airflow scheduler -D`.
-
-### Executing specific tasks
-
-Available tasks:
-
-- meltano_csv-to-lfs
-- meltano_postgres-to-lfs
-- meltano_lfs-to-analytics
-
-1. Run specific task for today: `docker exec server invoke airflow dags trigger TASK`.
-
-1. Run specific task for past date: `docker exec server invoke airflow backfill -s DATE -e DATE TASK`.

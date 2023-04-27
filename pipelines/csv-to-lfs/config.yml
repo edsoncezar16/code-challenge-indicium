@@ -1,0 +1,24 @@
+plugins:
+  extractors:
+    - name: tap-csv--northwind
+      inherit_from: tap-csv
+      config:
+        add_metadata_columns: true
+        files:
+          - entity: order_details
+            path: data/order_details.csv
+            keys:
+              - order_id
+              - product_id
+  loaders:
+    - name: target-csv--csv
+      inherit_from: target-csv
+      variant: meltanolabs
+      pip_url: git+https://github.com/MeltanoLabs/target-csv.git
+      config:
+        file_naming_scheme: csv-{datestamp}-{stream_name}.csv
+        output_path_prefix: output/
+jobs:
+  - name: csv-to-lfs
+    tasks:
+      - tap-csv--northwind target-csv--csv

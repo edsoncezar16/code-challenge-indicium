@@ -27,7 +27,11 @@ services:
   server:
     container_name: server
     build: .
-    entrypoint: tail -f /dev/null
+    entrypoint: tail -f /dev/null # just to keep container running
+    volumes:
+      - ./output:/project/output
+    env_file:
+      - .env
 
 volumes:
   dbdata:

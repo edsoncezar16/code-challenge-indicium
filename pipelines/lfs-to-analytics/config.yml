@@ -1,0 +1,24 @@
+plugins:
+  extractors:
+    - name: tap-csv--lfs
+      inherit_from: tap-csv
+      config:
+        files:
+          - entity: order_details
+            path: output/csv-2023-04-26-order_details.csv
+            keys:
+              - order_id
+              - product_id
+          - entity: orders
+            path: output/postgres-2023-04-26-public-orders.csv
+            keys:
+              - order_id
+  loaders:
+    - name: target-postgres
+      variant: transferwise
+      pip_url: pipelinewise-target-postgres
+
+jobs:
+  - name: lfs-to-analytics
+    tasks:
+      - tap-csv--lfs target-postgres
