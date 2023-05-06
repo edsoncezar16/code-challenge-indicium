@@ -1,3 +1,4 @@
 /plugins/**/*.lock
 /.env
 /.terraform
+/terraform.tfstate*
