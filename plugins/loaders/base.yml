@@ -1,0 +1,17 @@
+plugins:
+  loaders:
+    - name: target-csv
+      variant: meltanolabs
+      pip_url: git+https://github.com/MeltanoLabs/target-csv.git
+      config:
+        output_path_prefix: output/
+    - name: target-postgres
+      variant: transferwise
+      pip_url: pipelinewise-target-postgres
+      config:
+        host: analytics-db
+        port: 5432
+        user: datanauta
+        password: ${OUTPUT_DB_PASSWORD}
+        dbname: analytics
+        default_target_schema: public

@@ -15,9 +15,6 @@ plugins:
               - order_id
   loaders:
     - name: target-postgres
-      variant: transferwise
-      pip_url: pipelinewise-target-postgres
-
 jobs:
   - name: lfs-to-analytics
     tasks:

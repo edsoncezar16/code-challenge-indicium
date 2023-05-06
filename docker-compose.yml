@@ -17,9 +17,9 @@ services:
     container_name: analytics-db
     image: postgres
     environment:
-      POSTGRES_DB: ${TARGET_POSTGRES_DBNAME}
-      POSTGRES_USER: ${TARGET_POSTGRES_USER}
-      POSTGRES_PASSWORD: ${TARGET_POSTGRES_PASSWORD}
+      POSTGRES_DB: analytics
+      POSTGRES_USER: datanauta
+      POSTGRES_PASSWORD: ${OUTPUT_DB_PASSWORD}
     volumes:
       - ./data:/home/data
       - analytics-dbdata:/var/lib/postgresql/data

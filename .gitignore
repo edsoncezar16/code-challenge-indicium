@@ -1,2 +1,3 @@
 /plugins/**/*.lock
 /.env
+/.terraform

@@ -1,0 +1,18 @@
+plugins:
+  extractors:
+    - name: tap-csv
+      config:
+        add_metadata_columns: true
+    - name: tap-postgres
+      variant: transferwise
+      pip_url: pipelinewise-tap-postgres
+      config:
+        host: db
+        port: 5432
+        user: northwind_user
+        password: thewindisblowing
+        dbname: northwind
+        default_replication_method: INCREMENTAL
+      metadata:
+        "*":
+          replication-key: updated_at

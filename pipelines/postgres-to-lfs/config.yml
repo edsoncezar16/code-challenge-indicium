@@ -1,19 +1,11 @@
 plugins:
   extractors:
     - name: tap-postgres
-      variant: transferwise
-      pip_url: pipelinewise-tap-postgres
-      metadata:
-        "*":
-          replication-key: updated_at
   loaders:
     - name: target-csv--postgres
       inherit_from: target-csv
-      variant: meltanolabs
-      pip_url: git+https://github.com/MeltanoLabs/target-csv.git
       config:
         file_naming_scheme: postgres-{datestamp}-{stream_name}.csv
-        output_path_prefix: output/
 jobs:
   - name: postgres-to-lfs
     tasks:

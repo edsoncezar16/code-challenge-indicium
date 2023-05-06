@@ -88,31 +88,30 @@ To address the Indicium Tech Code Challenge, we will use Meltano, a powerful ope
 
 ### Setup
 
+Install terraform according to the [official documentation](https://developer.hashicorp.com/terraform/downloads?ajs_aid=a26244cb-144f-4c64-8ffe-bb606e860e37&product_intent=terraform).
+
+Since we are going to use Azure services in conjunction with Meltano, set up your terraform environment for deploying Azure resources [following the official documentation](https://developer.hashicorp.com/terraform/tutorials/azure-get-started/azure-build).
+
 Create a `.env` file in the project directory and configure environment variables:
 
 ``` bash
 # .env.example
 
-TAP_POSTGRES_HOST=db
-TAP_POSTGRES_PORT=5432
-TAP_POSTGRES_USER=northwind_user
-TAP_POSTGRES_PASSWORD=thewindisblowing
-TAP_POSTGRES_DBNAME=northwind
-TAP_POSTGRES_DEFAULT_REPLICATION_METHOD=INCREMENTAL
+OUTPUT_DB_PASSWORD=dataforsmartdecisions
 
-TARGET_POSTGRES_HOST=analytics-db
-TARGET_POSTGRES_PORT=5432
-TARGET_POSTGRES_USER=datanauta
-TARGET_POSTGRES_PASSWORD=dataforsmartdecisions
-TARGET_POSTGRES_DBNAME=analytics
-TARGET_POSTGRES_DEFAULT_TARGET_SCHEMA=public
+MELTANO_STATE_AZURE_CONNECTION_STRING="DefaultEndpointsProtocol=https;AccountName=meltanostatestorage;AccountKey=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx==;EndpointSuffix=core.windows.net"
 
-MELTANO_ENVIRONMENT=dev
+ARM_CLIENT_ID=xxxxxxxx-xxx-xxx-xxxx-xxxxxxxxxxxx
+ARM_CLIENT_SECRET=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+ARM_SUBSCRIPTION_ID=xxxxxxxx-xxx-xxx-xxxx-xxxxxxxxxxxx
+ARM_TENANT_ID=xxxxxxxx-xxx-xxx-xxxx-xxxxxxxxxxxx
+
+
 ```
 
-Replace `target_port` `target_user`, `target_password`, and `target_db` with an available port, your desired credentials and database name.
-
 Run `source .env` and `docker compose up -d [--build]`. This will setup a `db` service correspondent to the Northwind database, an `analytics-db` service correpondent to the target Postgres database, and a `server` service which contains meltano and all necessary plugins for our project. Use the `--build`flag if you made some changes and want to build an updated image.
+
+Run `terraform init` and `terraform apply meltano_state_azure.plan`to set up an Azure state backend service for Meltano pipelines.
 
 To make each table in the Northwind db set up for incremental extraction, rum `docker exec db psql -U northwind_user -d northwind -f /home/scripts/set-incremental-public.sql`.
 
